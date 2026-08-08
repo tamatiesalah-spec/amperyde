@@ -60,7 +60,7 @@ const C = {
   metal: "#9aa0ab",
   batt: "#22242c",
   battTop: "#2d303a",
-  volt: "#d6f24e",
+  brand: "#e23a34",
   line: "#dcdcd8",
 };
 
@@ -157,7 +157,7 @@ function motorLayer(comp: Component): string {
     return [
       circle(REAR.cx, REAR.cy, r, `fill="${C.hub}" stroke="${C.metal}" stroke-width="3"`),
       ...fins,
-      circle(REAR.cx, REAR.cy, r - 18, `fill="none" stroke="${C.volt}" stroke-width="3" opacity="0.8"`),
+      circle(REAR.cx, REAR.cy, r - 18, `fill="none" stroke="${C.brand}" stroke-width="3" opacity="0.8"`),
       circle(REAR.cx, REAR.cy, 10, `fill="${C.metal}"`),
     ].join("");
   }
@@ -172,7 +172,7 @@ function motorLayer(comp: Component): string {
   return [
     `<path d="M${x} ${y + 18} Q${x} ${y} ${x + 18} ${y} L${x + w - 18} ${y} Q${x + w} ${y} ${x + w} ${y + 18} L${x + w} ${y + h - 18} Q${x + w} ${y + h} ${x + w - 18} ${y + h} L${x + 18} ${y + h} Q${x} ${y + h} ${x} ${y + h - 18} Z" fill="${C.hub}" stroke="${C.metal}" stroke-width="3"/>`,
     ...fins,
-    `<rect x="${x + 16}" y="${y + h - 22}" width="${w - 32}" height="6" rx="3" fill="${C.volt}" opacity="0.85"/>`,
+    `<rect x="${x + 16}" y="${y + h - 22}" width="${w - 32}" height="6" rx="3" fill="${C.brand}" opacity="0.85"/>`,
     circle(BB.x, BB.y, 22, `fill="none" stroke="${C.metal}" stroke-width="5"`), // chainring hint
   ].join("");
 }
@@ -189,7 +189,7 @@ function batteryLayer(comp: Component): string {
   const cells = Math.round(v / 12);
   const leds: string[] = [];
   for (let i = 0; i < cells; i++) {
-    leds.push(`<rect x="${-len / 2 + 16 + i * ((len - 32) / cells)}" y="${wdt / 2 - 12}" width="${(len - 40) / cells}" height="5" rx="2.5" fill="${C.volt}" opacity="0.85"/>`);
+    leds.push(`<rect x="${-len / 2 + 16 + i * ((len - 32) / cells)}" y="${wdt / 2 - 12}" width="${(len - 40) / cells}" height="5" rx="2.5" fill="${C.brand}" opacity="0.85"/>`);
   }
   return `<g transform="translate(${mx} ${my}) rotate(${rot})">
     <rect x="${-len / 2}" y="${-wdt / 2}" width="${len}" height="${wdt}" rx="14" fill="${C.batt}" stroke="${C.battTop}" stroke-width="3"/>
@@ -211,7 +211,7 @@ function brakesLayer(comp: Component): string {
       circle(cx, cy, r - 6, `fill="none" stroke="#6b6f79" stroke-width="1.5"`),
       ...holes,
       // caliper at top of rotor
-      `<rect x="${cx - 12}" y="${cy - r - 12}" width="24" height="30" rx="5" fill="${C.hub}" stroke="${C.volt}" stroke-width="2"/>`,
+      `<rect x="${cx - 12}" y="${cy - r - 12}" width="24" height="30" rx="5" fill="${C.hub}" stroke="${C.brand}" stroke-width="2"/>`,
     ].join("");
   };
   return rotor(FRONT.cx, FRONT.cy) + rotor(REAR.cx, REAR.cy);
@@ -230,7 +230,7 @@ function cockpitLayer(comp: Component): string {
   const dw = pro ? 62 : 40;
   const dh = pro ? 40 : 26;
   parts.push(`<rect x="${HEAD_TOP.x - 4}" y="${barTop - dh - 6}" width="${dw}" height="${dh}" rx="6" fill="#0d0e12" stroke="${C.metal}" stroke-width="2"/>`);
-  parts.push(`<rect x="${HEAD_TOP.x}" y="${barTop - dh - 2}" width="${dw - 8}" height="${dh - 8}" rx="3" fill="${pro ? C.volt : "#33363f"}" opacity="${pro ? 0.85 : 1}"/>`);
+  parts.push(`<rect x="${HEAD_TOP.x}" y="${barTop - dh - 2}" width="${dw - 8}" height="${dh - 8}" rx="3" fill="${pro ? C.brand : "#33363f"}" opacity="${pro ? 0.85 : 1}"/>`);
   return parts.join("");
 }
 
@@ -250,7 +250,7 @@ function finishLayer(comp: Component): string {
     <path d="M${SEAT.x + 20} ${SEAT.y - 6} L${HEAD_TOP.x - 30} ${HEAD_TOP.y - 4} L${HEAD_TOP.x - 30} ${HEAD_TOP.y + 20} L${SEAT.x + 20} ${SEAT.y + 22} Z" fill="${fill}" opacity="0.92"/>
     <!-- front number plate -->
     <path d="M${HEAD_TOP.x + 10} ${HEAD_TOP.y + 6} q40 6 44 74 l-30 6 q-14 -44 -32 -60 Z" fill="${fill}" opacity="0.92"/>
-    <rect x="${SEAT.x + 30}" y="${SEAT.y + 2}" width="70" height="4" rx="2" fill="${C.volt}" opacity="0.7"/>`;
+    <rect x="${SEAT.x + 30}" y="${SEAT.y + 2}" width="70" height="4" rx="2" fill="${C.brand}" opacity="0.7"/>`;
 }
 
 const PAINTERS: Record<Category, (c: Component) => string> = {

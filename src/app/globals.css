@@ -1,24 +1,29 @@
 @import "tailwindcss";
 
 /*
-  AMPERYDE — committed dark, high-performance aesthetic (configurator-site feel,
-  not a generic template). Off-road electric: near-black surfaces, an electric
-  "volt" accent, ember for warnings.
+  AMPERYDE — committed dark aesthetic keyed to the brand logo: near-black
+  surfaces, racing-red primary accent, metallic silver secondary. Colors sampled
+  from logo/main logo.png (red #c82423, silver #939392, white #f8f8f8).
 */
 
 @theme {
-  --color-bg: #0a0a0c;
-  --color-surface: #121216;
-  --color-surface-2: #1a1a20;
-  --color-surface-3: #24242c;
-  --color-line: #2a2a33;
-  --color-ink: #f4f4f2;
-  --color-muted: #a2a2ad;
-  --color-faint: #6c6c78;
+  --color-bg: #0a0a0b;
+  --color-surface: #141416;
+  --color-surface-2: #1c1c1f;
+  --color-surface-3: #26262a;
+  --color-line: #2c2c31;
+  --color-ink: #f6f6f5;
+  --color-muted: #a4a4a9;
+  --color-faint: #6e6e75;
 
-  --color-volt: #d6f24e;
-  --color-volt-dim: #9bb02f;
-  --color-ember: #ff6a3d;
+  /* Primary accent — logo red. */
+  --color-brand: #d42a28;
+  --color-brand-bright: #ee4a44;
+  --color-brand-dim: #7f2320;
+
+  /* Secondary accent — logo silver. */
+  --color-steel: #9a9c9e;
+  --color-steel-dim: #6a6c70;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -35,15 +40,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Thin, brand-consistent scrollbars in the configurator panels. */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-surface-3) transparent;
 }
 
 ::selection {
-  background: var(--color-volt);
-  color: #0a0a0c;
+  background: var(--color-brand);
+  color: #ffffff;
 }
 
 /* Uppercase micro-label used throughout the UI. */

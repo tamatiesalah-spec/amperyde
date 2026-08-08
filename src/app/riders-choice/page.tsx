@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BrandLogo } from "@/components/BrandLogo";
 import { getCatalogRepository } from "@/data";
 import { buildContext, selectionFromComponentIds } from "@/domain/compatibility";
 import { priceSelection, formatUsd } from "@/domain/pricing";
@@ -20,8 +21,8 @@ export default async function RidersChoicePage() {
   return (
     <div className="flex flex-1 flex-col">
       <header className="flex items-center justify-between border-b border-line px-6 py-4">
-        <Link href="/" className="text-lg font-semibold tracking-tight">
-          AMPER<span className="text-volt">YDE</span>
+        <Link href="/" aria-label="AMPERYDE home">
+          <BrandLogo className="h-8 w-auto" />
         </Link>
         <Link
           href="/configure"
@@ -50,13 +51,13 @@ export default async function RidersChoicePage() {
               <div
                 key={preset.id}
                 className={`flex flex-col rounded-2xl border p-6 ${
-                  featured ? "border-volt/40 bg-volt/[0.03]" : "border-line bg-surface"
+                  featured ? "border-brand/40 bg-brand/[0.03]" : "border-line bg-surface"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <p className="eyebrow">Tier {preset.tier}</p>
                   {featured && (
-                    <span className="rounded-full bg-volt px-2 py-0.5 text-[10px] font-semibold text-black">
+                    <span className="rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-white">
                       Flagship
                     </span>
                   )}
@@ -96,7 +97,7 @@ export default async function RidersChoicePage() {
                   href={`/configure?preset=${preset.id}`}
                   className={`mt-5 rounded-full px-5 py-2.5 text-center text-sm font-semibold transition ${
                     featured
-                      ? "bg-volt text-black hover:brightness-105"
+                      ? "bg-brand text-white hover:brightness-105"
                       : "border border-line text-ink hover:border-muted"
                   }`}
                 >

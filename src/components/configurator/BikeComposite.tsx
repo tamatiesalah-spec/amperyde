@@ -89,7 +89,7 @@ export function BikeComposite({ selection, currentCategory, ctx, onSelectCategor
                   className="group absolute -translate-x-1/2 -translate-y-1/2"
                   aria-label={`${CATEGORY_LABELS[cat]}${comp ? `: ${comp.name}` : ""}`}
                 >
-                  <span className="block h-3 w-3 rounded-full bg-volt/80 ring-4 ring-volt/15 transition group-hover:bg-volt" />
+                  <span className="block h-3 w-3 rounded-full bg-brand/80 ring-4 ring-brand/15 transition group-hover:bg-brand" />
                   <span className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2 whitespace-nowrap rounded border border-line bg-surface-2/90 px-1.5 py-0.5 text-[10px] text-muted opacity-0 backdrop-blur transition group-hover:opacity-100">
                     {CATEGORY_LABELS[cat]}
                   </span>

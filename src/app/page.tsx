@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/BrandLogo";
 
 // Landing entry. The cinematic scroll-scrub hero is a later increment; this is a
 // clean, on-brand gateway to the two flows. Per the non-negotiable, there is no
@@ -8,9 +9,7 @@ export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
       <header className="flex items-center justify-between px-6 py-5">
-        <span className="text-lg font-semibold tracking-tight">
-          AMPER<span className="text-volt">YDE</span>
-        </span>
+        <BrandLogo className="h-8 w-auto" />
         <nav className="flex items-center gap-6 text-sm text-muted">
           <Link href="/riders-choice" className="hover:text-ink">
             Rider&apos;s Choice
@@ -27,7 +26,7 @@ export default function Home() {
           <h1 className="mt-4 max-w-4xl text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl">
             Built to your line.
             <br />
-            <span className="text-volt">Engineered to order.</span>
+            <span className="text-brand">Engineered to order.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted">
             Every AMPERYDE off-road bike is configured, validated, and built for
@@ -46,12 +45,12 @@ export default function Home() {
               <p className="mt-1 text-sm text-muted">
                 Three fully-configured builds across three tiers.
               </p>
-              <span className="mt-4 inline-block text-sm text-volt">Explore builds →</span>
+              <span className="mt-4 inline-block text-sm text-brand">Explore builds →</span>
             </Link>
 
             <Link
               href="/configure"
-              className="group rounded-2xl border border-volt/40 bg-volt/[0.03] p-6 transition hover:border-volt"
+              className="group rounded-2xl border border-brand/40 bg-brand/[0.03] p-6 transition hover:border-brand"
             >
               <p className="eyebrow">Full control</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight">
@@ -60,7 +59,7 @@ export default function Home() {
               <p className="mt-1 text-sm text-muted">
                 Guided build, live pricing, compatibility handled for you.
               </p>
-              <span className="mt-4 inline-block text-sm text-volt">
+              <span className="mt-4 inline-block text-sm text-brand">
                 Open the configurator →
               </span>
             </Link>

@@ -62,7 +62,7 @@ export function PriceBar({ price, validity }: Props) {
         <div className="ml-auto flex items-center gap-4">
           <span
             className={`hidden text-sm sm:inline ${
-              ready ? "text-volt" : "text-faint"
+              ready ? "text-brand" : "text-faint"
             }`}
           >
             {ready
@@ -76,7 +76,7 @@ export function PriceBar({ price, validity }: Props) {
             disabled={!ready}
             className={`rounded-full px-6 py-2.5 text-sm font-semibold transition ${
               ready
-                ? "bg-volt text-black hover:brightness-105"
+                ? "bg-brand text-white hover:brightness-105"
                 : "cursor-not-allowed bg-surface-3 text-faint"
             }`}
           >

@@ -18,6 +18,7 @@ import {
 import { defaultSelection, nextCategory, prevCategory } from "@/domain/configurator";
 import { formatUsd, priceSelection } from "@/domain/pricing";
 import { useConfiguratorStore } from "@/state/configuratorStore";
+import { BrandLogo } from "@/components/BrandLogo";
 import { BikePreview } from "./BikePreview";
 import { PriceBar } from "./PriceBar";
 
@@ -85,8 +86,8 @@ export function Configurator({ catalog, initialComponentIds, presetName }: Props
       {/* Header */}
       <header className="flex items-center justify-between border-b border-line px-6 py-4">
         <div className="flex items-center gap-4">
-          <Link href="/" className="text-lg font-semibold tracking-tight">
-            AMPER<span className="text-volt">YDE</span>
+          <Link href="/" aria-label="AMPERYDE home">
+            <BrandLogo className="h-8 w-auto" />
           </Link>
           <span className="text-faint">/</span>
           <span className="text-sm text-muted">
@@ -172,7 +173,7 @@ export function Configurator({ catalog, initialComponentIds, presetName }: Props
               key={i}
               className="pointer-events-auto rounded-lg border border-line bg-surface-2 px-4 py-2 text-sm text-muted shadow-xl"
             >
-              <span className="text-volt">{CATEGORY_LABELS[n.category]}: </span>
+              <span className="text-brand">{CATEGORY_LABELS[n.category]}: </span>
               {n.reason}
             </div>
           ))}
@@ -212,7 +213,7 @@ function StepRail({
             <span className="flex items-center gap-1.5">
               <span
                 className={`grid h-4 w-4 place-items-center rounded-full text-[10px] font-semibold ${
-                  active ? "bg-volt text-black" : "bg-surface-3 text-faint"
+                  active ? "bg-brand text-white" : "bg-surface-3 text-faint"
                 }`}
               >
                 {i + 1}
@@ -249,7 +250,7 @@ function OptionCard({
       aria-pressed={isSelected}
       className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition ${
         isSelected
-          ? "border-volt bg-volt/5"
+          ? "border-brand bg-brand/5"
           : disabled
             ? "cursor-not-allowed border-line/60 opacity-55"
             : "border-line hover:border-muted hover:bg-surface-2"
@@ -258,7 +259,7 @@ function OptionCard({
       {/* Swatch placeholder (stands in for the option's close-up asset). */}
       <span
         className={`grid h-12 w-12 shrink-0 place-items-center rounded-lg border text-xs font-semibold ${
-          isSelected ? "border-volt/50 text-volt" : "border-line text-faint"
+          isSelected ? "border-brand/50 text-brand" : "border-line text-faint"
         } bg-surface-2`}
       >
         {initials(component.name)}
@@ -268,7 +269,7 @@ function OptionCard({
         <span className="flex items-center gap-2">
           <span className="truncate font-medium">{component.name}</span>
           {isSelected && (
-            <span className="rounded-full bg-volt px-1.5 py-0.5 text-[10px] font-semibold text-black">
+            <span className="rounded-full bg-brand px-1.5 py-0.5 text-[10px] font-semibold text-white">
               Selected
             </span>
           )}
