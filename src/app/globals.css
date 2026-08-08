@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+/*
+  AMPERYDE — committed dark, high-performance aesthetic (configurator-site feel,
+  not a generic template). Off-road electric: near-black surfaces, an electric
+  "volt" accent, ember for warnings.
+*/
+
+@theme {
+  --color-bg: #0a0a0c;
+  --color-surface: #121216;
+  --color-surface-2: #1a1a20;
+  --color-surface-3: #24242c;
+  --color-line: #2a2a33;
+  --color-ink: #f4f4f2;
+  --color-muted: #a2a2ad;
+  --color-faint: #6c6c78;
+
+  --color-volt: #d6f24e;
+  --color-volt-dim: #9bb02f;
+  --color-ember: #ff6a3d;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thin, brand-consistent scrollbars in the configurator panels. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-surface-3) transparent;
+}
+
+::selection {
+  background: var(--color-volt);
+  color: #0a0a0c;
+}
+
+/* Uppercase micro-label used throughout the UI. */
+.eyebrow {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.6875rem;
+  color: var(--color-faint);
+}
