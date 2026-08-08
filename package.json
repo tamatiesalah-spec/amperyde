@@ -9,9 +9,11 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:seed-sql": "node scripts/generate-seed-sql.mts"
+    "db:seed-sql": "node scripts/generate-seed-sql.mts",
+    "art:placeholders": "node scripts/generate-placeholder-art.mts"
   },
   "dependencies": {
+    "framer-motion": "^13.0.0",
     "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",

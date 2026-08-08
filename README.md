@@ -14,10 +14,20 @@ Following the brief's build order (data model → configurator → compositing/z
 → cinematic hero → checkout):
 
 - ✅ **Data model + compatibility logic** — SQL schema, typed seed, engines, tests
-- ✅ **Bare-bones configurator with live pricing** — guided flow, no bike art yet
-- ⬜ Layered image compositing + zoom interactions
+- ✅ **Bare-bones configurator with live pricing** — guided flow
+- ✅ **Layered image compositing + zoom interactions** — stacked per-category layers,
+  real-time swaps, CSS-transform zoom/pan into each region
 - ⬜ Landing-page cinematic scroll-scrub hero
 - ⬜ Cart / checkout with server-side price re-validation
+
+### Compositing & assets
+
+The preview stacks one image layer per category (`src/lib/bikeArt.ts` generates
+placeholder SVGs via `npm run art:placeholders`). Asset references are
+**source-agnostic** (`src/lib/assets.ts`): a reference resolves to a URL and is
+drawn without the renderer knowing whether it points at staged photography, a
+render, or a CDN — so imagery migrates category-by-category as a data-only
+change. A missing/failed asset falls back to procedural placeholder art.
 
 ## Run
 

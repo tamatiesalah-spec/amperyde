@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" width="1000" height="640" fill="none"><defs><pattern id="weave" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" fill="#3b3e47"/><line x1="0" y1="0" x2="0" y2="10" stroke="#4a4d57" stroke-width="3"/></pattern></defs>
+    <!-- top-tube tank panel -->
+    <path d="M398 246 L660 220 L660 244 L398 274 Z" fill="url(#weave)" opacity="0.92"/>
+    <!-- front number plate -->
+    <path d="M700 230 q40 6 44 74 l-30 6 q-14 -44 -32 -60 Z" fill="url(#weave)" opacity="0.92"/>
+    <rect x="408" y="254" width="70" height="4" rx="2" fill="#d6f24e" opacity="0.7"/></svg>
