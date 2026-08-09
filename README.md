@@ -24,18 +24,21 @@ a data-driven, compatibility-gated bike configurator with live pricing.
 > - **Terms of Service** ([/terms](src/app/terms/page.tsx)) — placeholder copy,
 >   not approved legal language.
 
-## Status — build increments 1–4 of 5 complete
+## Status — all 5 build increments complete
 
 Following the brief's build order (data model → configurator → compositing/zoom
 → cinematic hero → checkout):
 
 - ✅ **Data model + compatibility logic** — SQL schema, typed seed, engines, tests
-- ✅ **Bare-bones configurator with live pricing** — guided flow
+- ✅ **Configurator with live pricing** — 14-step guided flow + multi-select extras
 - ✅ **Layered image compositing + zoom interactions** — stacked per-category layers,
   real-time swaps, CSS-transform zoom/pan into each region
 - ✅ **Landing-page cinematic scroll-scrub hero** — preloaded canvas image sequence,
   scroll maps to frame index; scroll-triggered reveal sections below
-- ⬜ Cart / checkout with server-side price re-validation
+- ✅ **Checkout with server-side price re-validation** — `/checkout` re-validates the
+  order (`validateOrder`) before any charge, mandatory T&C acceptance, pickup
+  selection, Stripe **test-keys-only** session creation. Standalone `/terms` and
+  `/conversion-kit` pages (both placeholder copy).
 
 ### Hero (scroll-scrub)
 

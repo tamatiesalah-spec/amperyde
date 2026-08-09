@@ -5,6 +5,7 @@
 // before checkout (validateOrder).
 
 import { useState } from "react";
+import Link from "next/link";
 import { CATEGORY_LABELS } from "@/domain/types";
 import { formatMoney, type PriceBreakdown } from "@/domain/pricing";
 import type { BuildValidity } from "@/domain/compatibility";
@@ -12,9 +13,10 @@ import type { BuildValidity } from "@/domain/compatibility";
 interface Props {
   price: PriceBreakdown;
   validity: BuildValidity;
+  checkoutHref: string;
 }
 
-export function PriceBar({ price, validity }: Props) {
+export function PriceBar({ price, validity, checkoutHref }: Props) {
   const [open, setOpen] = useState(false);
   const ready = validity.complete && validity.valid;
   const cur = price.currency;
@@ -74,15 +76,22 @@ export function PriceBar({ price, validity }: Props) {
                 ? "Select every component"
                 : validity.issues[0]?.reason ?? "Resolve conflicts"}
           </span>
-          <button
-            type="button"
-            disabled={!ready}
-            className={`rounded-full px-6 py-2.5 text-sm font-semibold transition ${
-              ready ? "bg-brand text-white hover:brightness-105" : "cursor-not-allowed bg-surface-3 text-faint"
-            }`}
-          >
-            Continue to checkout
-          </button>
+          {ready ? (
+            <Link
+              href={checkoutHref}
+              className="rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-105"
+            >
+              Continue to checkout
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="cursor-not-allowed rounded-full bg-surface-3 px-6 py-2.5 text-sm font-semibold text-faint"
+            >
+              Continue to checkout
+            </button>
+          )}
         </div>
       </div>
     </div>

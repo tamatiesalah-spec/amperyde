@@ -74,6 +74,10 @@ export function Configurator({ catalog, initialComponentIds, initialExtraIds, pr
     [catalog.line, catalog.extras, selection, extraIds, ctx],
   );
   const validity = useMemo(() => validateBuild(selection, ctx), [selection, ctx]);
+  const checkoutHref = useMemo(() => {
+    const c = CATEGORY_ORDER.map((cat) => selection[cat]).filter(Boolean).join(",");
+    return `/checkout?c=${c}&e=${extraIds.join(",")}&t=${price.totalCents}`;
+  }, [selection, extraIds, price.totalCents]);
   const options = useMemo(
     () => (currentStep === "extras" ? [] : optionsForCategory(currentStep, selection, ctx)),
     [currentStep, selection, ctx],
@@ -179,7 +183,7 @@ export function Configurator({ catalog, initialComponentIds, initialExtraIds, pr
         </div>
       )}
 
-      <PriceBar price={price} validity={validity} />
+      <PriceBar price={price} validity={validity} checkoutHref={checkoutHref} />
     </div>
   );
 }
