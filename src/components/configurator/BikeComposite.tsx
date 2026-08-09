@@ -30,7 +30,13 @@ interface Props {
 }
 
 // Categories shown "full bike" — hotspots visible, gentle zoom.
-const OVERVIEW: ReadonlySet<Category> = new Set<Category>(["chassis", "finish"]);
+const OVERVIEW: ReadonlySet<Category> = new Set<Category>([
+  "chassis",
+  "frame_size",
+  "main_colour",
+  "accent_colour",
+  "finish_type",
+]);
 
 export function BikeComposite({ selection, currentCategory, ctx, onSelectCategory }: Props) {
   const region = FOCUS_REGIONS[currentCategory];

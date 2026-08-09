@@ -3,8 +3,11 @@ import { notFound } from "next/navigation";
 import { BrandLogo } from "@/components/BrandLogo";
 import { getCatalogRepository } from "@/data";
 import { buildContext, selectionFromComponentIds } from "@/domain/compatibility";
-import { priceSelection, formatUsd } from "@/domain/pricing";
-import { CATEGORY_LABELS, CATEGORY_ORDER } from "@/domain/types";
+import { priceSelection, formatMoney } from "@/domain/pricing";
+import { CATEGORY_LABELS, type Category } from "@/domain/types";
+
+// Headline specs shown on each preset card (the full 13 live in the configurator).
+const SPEC_CATS: Category[] = ["chassis", "wheel_size", "motor", "battery", "brakes", "tyres"];
 
 export const metadata = {
   title: "Rider's Choice — AMPERYDE Off-Road",
@@ -45,7 +48,10 @@ export default async function RidersChoicePage() {
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {presets.map((preset) => {
             const selection = selectionFromComponentIds(preset.componentIds, ctx);
-            const price = priceSelection(catalog.line, selection, ctx);
+            const price = priceSelection(catalog.line, selection, ctx, {
+              all: catalog.extras,
+              selectedIds: preset.extraIds ?? [],
+            });
             const featured = preset.tier === 3;
             return (
               <div
@@ -74,7 +80,7 @@ export default async function RidersChoicePage() {
                 )}
 
                 <dl className="mt-5 space-y-1.5 border-t border-line pt-4 text-sm">
-                  {CATEGORY_ORDER.map((cat) => {
+                  {SPEC_CATS.map((cat) => {
                     const id = selection[cat];
                     const comp = id ? ctx.byId.get(id) : undefined;
                     return (
@@ -84,12 +90,18 @@ export default async function RidersChoicePage() {
                       </div>
                     );
                   })}
+                  {preset.extraIds && preset.extraIds.length > 0 && (
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-faint">Extras</dt>
+                      <dd className="truncate text-right text-muted">{preset.extraIds.length} included</dd>
+                    </div>
+                  )}
                 </dl>
 
                 <div className="mt-6 flex items-baseline justify-between">
                   <span className="eyebrow">From</span>
                   <span className="text-2xl font-semibold tracking-tight">
-                    {formatUsd(price.totalCents)}
+                    {formatMoney(price.totalCents, catalog.line.currency)}
                   </span>
                 </div>
 

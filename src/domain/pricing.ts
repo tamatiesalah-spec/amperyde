@@ -1,29 +1,44 @@
-// Pricing engine — pure. Total = line base price + sum of selected component
-// price deltas. Computed client-side for instant feedback; the SAME function
-// runs server-side to re-validate the price before checkout.
+// Pricing engine — pure. Total = line base price + selected component deltas +
+// selected extra deltas. Computed client-side for instant feedback; the SAME
+// function runs server-side to re-validate the price before checkout.
 
-import { CATEGORY_ORDER, type Category, type ProductLine, type Selection } from "@/domain/types";
+import {
+  CATEGORY_ORDER,
+  type Category,
+  type Extra,
+  type ProductLine,
+  type Selection,
+} from "@/domain/types";
 import type { CompatContext } from "@/domain/compatibility";
 
-export interface PriceLineItem {
-  category: Category;
-  componentId: string;
+export interface PriceItem {
+  kind: "component" | "extra";
+  id: string;
   name: string;
   priceDeltaCents: number;
+  category?: Category;
 }
 
 export interface PriceBreakdown {
   basePriceCents: number;
-  lineItems: PriceLineItem[];
+  componentItems: PriceItem[];
+  extraItems: PriceItem[];
   totalCents: number;
+  currency: string;
+}
+
+export interface ExtrasPricingContext {
+  all: Extra[];
+  selectedIds: string[];
 }
 
 export function priceSelection(
   line: ProductLine,
   selection: Selection,
   ctx: CompatContext,
+  extras?: ExtrasPricingContext,
 ): PriceBreakdown {
-  const lineItems: PriceLineItem[] = [];
+  const componentItems: PriceItem[] = [];
   let total = line.basePriceCents;
 
   for (const category of CATEGORY_ORDER) {
@@ -31,23 +46,50 @@ export function priceSelection(
     if (!id) continue;
     const comp = ctx.byId.get(id);
     if (!comp) continue;
-    lineItems.push({
-      category,
-      componentId: comp.id,
+    componentItems.push({
+      kind: "component",
+      id: comp.id,
       name: comp.name,
       priceDeltaCents: comp.priceDeltaCents,
+      category,
     });
     total += comp.priceDeltaCents;
   }
 
-  return { basePriceCents: line.basePriceCents, lineItems, totalCents: total };
+  const extraItems: PriceItem[] = [];
+  if (extras) {
+    const byId = new Map(extras.all.map((e) => [e.id, e]));
+    // De-dupe selected ids, preserve catalog order for a stable breakdown.
+    const selected = new Set(extras.selectedIds);
+    for (const extra of extras.all) {
+      if (!selected.has(extra.id)) continue;
+      extraItems.push({
+        kind: "extra",
+        id: extra.id,
+        name: extra.name,
+        priceDeltaCents: extra.priceDeltaCents,
+      });
+      total += extra.priceDeltaCents;
+    }
+    // Any selected id not in the catalog is ignored here (pricing stays honest);
+    // checkout re-validation is what rejects unknown extras.
+    void byId;
+  }
+
+  return {
+    basePriceCents: line.basePriceCents,
+    componentItems,
+    extraItems,
+    totalCents: total,
+    currency: line.currency,
+  };
 }
 
-/** USD formatting from integer cents. */
-export function formatUsd(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
+/** Currency formatting from integer cents (whole units, no decimals). */
+export function formatMoney(cents: number, currency = "EUR"): string {
+  return new Intl.NumberFormat("en-IE", {
     style: "currency",
-    currency: "USD",
+    currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(cents / 100);

@@ -26,11 +26,11 @@ const lines: string[] = [
   "",
 ];
 
-const { line, components, incompatibilities, presets } = offRoadCatalog;
+const { line, components, extras, incompatibilities, presets } = offRoadCatalog;
 
 lines.push("-- Product line");
 lines.push(
-  `insert into product_line (id, slug, name, description, base_price_cents) values (${q(line.id)}, ${q(line.slug)}, ${q(line.name)}, ${q(line.description)}, ${n(line.basePriceCents)});`,
+  `insert into product_line (id, slug, name, description, base_price_cents, currency) values (${q(line.id)}, ${q(line.slug)}, ${q(line.name)}, ${q(line.description)}, ${n(line.basePriceCents)}, ${q(line.currency)});`,
   "",
 );
 
@@ -43,8 +43,17 @@ const orderedComponents = [...components].sort(
 );
 for (const c of orderedComponents) {
   lines.push(
-    `insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, layer_asset, closeup_asset, is_default, sort_order) values (` +
-      `${q(c.id)}, ${q(c.lineId)}, ${q(c.category)}, ${q(c.name)}, ${q(c.description)}, ${n(c.priceDeltaCents)}, ${q(c.frameType)}, ${frameArr(c.compatibleFrameTypes)}, ${q(c.motorType)}, ${n(c.voltage)}, ${q(c.layerAsset)}, ${q(c.closeupAsset)}, ${b(c.isDefault)}, ${n(c.sortOrder)});`,
+    `insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, swatch, layer_asset, closeup_asset, is_default, sort_order) values (` +
+      `${q(c.id)}, ${q(c.lineId)}, ${q(c.category)}, ${q(c.name)}, ${q(c.description)}, ${n(c.priceDeltaCents)}, ${q(c.frameType)}, ${frameArr(c.compatibleFrameTypes)}, ${q(c.motorType)}, ${n(c.voltage)}, ${q(c.swatch)}, ${q(c.layerAsset)}, ${q(c.closeupAsset)}, ${b(c.isDefault)}, ${n(c.sortOrder)});`,
+  );
+}
+lines.push("");
+
+lines.push("-- Extras");
+for (const e of [...extras].sort((a, b) => a.sortOrder - b.sortOrder)) {
+  lines.push(
+    `insert into extras (id, line_id, name, description, price_delta_cents, compatible_frame_types, note, enables_street_legal, sort_order) values (` +
+      `${q(e.id)}, ${q(e.lineId)}, ${q(e.name)}, ${q(e.description)}, ${n(e.priceDeltaCents)}, ${frameArr(e.compatibleFrameTypes)}, ${q(e.note)}, ${b(e.enablesStreetLegal ?? false)}, ${n(e.sortOrder)});`,
   );
 }
 lines.push("");
@@ -66,6 +75,9 @@ for (const p of presets) {
     lines.push(
       `insert into preset_components (preset_id, component_id) values (${q(p.id)}, ${q(cid)});`,
     );
+  }
+  for (const eid of p.extraIds ?? []) {
+    lines.push(`insert into preset_extras (preset_id, extra_id) values (${q(p.id)}, ${q(eid)});`);
   }
   lines.push("");
 }

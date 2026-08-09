@@ -1,15 +1,13 @@
 // Server-side order re-validation — the price-integrity guard.
 //
 // The client computes price for instant feedback, but the client is UNTRUSTED:
-// a payload can be tampered (wrong total, incompatible or foreign components,
-// unknown ids) and prices can go stale between load and checkout. Before any
-// charge is created, the server recomputes everything from the trusted catalog
-// and rejects anything that doesn't reconcile. This is the one path where a bug
-// means someone pays the wrong amount, so it never trusts a client-sent number.
+// a payload can be tampered (wrong total, incompatible / foreign / unknown
+// components or extras) and prices can go stale. Before any charge, the server
+// recomputes everything from the trusted catalog and rejects anything that
+// doesn't reconcile. It never trusts a client-sent total.
 //
-// Pure and catalog-injected so it is exhaustively unit-testable (see
-// checkout.test.ts). The async server entry is revalidateOrder() in
-// src/server/revalidateOrder.ts.
+// Pure and catalog-injected so it is exhaustively unit-testable (checkout.test.ts).
+// Async server entry: revalidateOrder() in src/server/revalidateOrder.ts.
 
 import {
   CATEGORY_ORDER,
@@ -17,14 +15,14 @@ import {
   type Category,
   type Selection,
 } from "@/domain/types";
-import { buildContext, validateBuild } from "@/domain/compatibility";
+import { buildContext, selectedFrameType, validateBuild } from "@/domain/compatibility";
 import { priceSelection, type PriceBreakdown } from "@/domain/pricing";
 
 export interface OrderRequest {
-  /** Which product line the client thinks it is buying from. */
   lineSlug: string;
-  /** Client-submitted selection (one component id per category, ideally). */
   componentIds: string[];
+  /** Selected optional add-ons. */
+  extraIds?: string[];
   /** Client-claimed total, in cents. Used ONLY to detect tampering/staleness. */
   expectedTotalCents: number;
 }
@@ -36,23 +34,21 @@ export type OrderError =
   | { code: "duplicate_category"; category: Category; componentIds: string[] }
   | { code: "incomplete_build"; missing: Category[] }
   | { code: "incompatible"; category: Category; reason: string }
+  | { code: "unknown_extra"; extraId: string }
+  | { code: "foreign_line_extra"; extraId: string }
+  | { code: "extra_frame_incompatible"; extraId: string; reason: string }
   | { code: "price_mismatch"; expectedCents: number; actualCents: number };
 
 export interface OrderValidation {
   ok: boolean;
   errors: OrderError[];
-  /** Authoritative, server-computed values (present once the line resolves). */
   selection?: Selection;
+  extraIds?: string[];
   breakdown?: PriceBreakdown;
   /** The server's authoritative total — the ONLY total safe to charge. */
   totalCents?: number;
 }
 
-/**
- * Re-validate an untrusted order against a trusted catalog. Returns ok only when
- * every component resolves to this line, the build is complete and compatible,
- * and the client's expected total exactly equals the server-recomputed total.
- */
 export function validateOrder(request: OrderRequest, catalog: Catalog): OrderValidation {
   if (catalog.line.slug !== request.lineSlug) {
     return { ok: false, errors: [{ code: "unknown_line", lineSlug: request.lineSlug }] };
@@ -61,9 +57,7 @@ export function validateOrder(request: OrderRequest, catalog: Catalog): OrderVal
   const ctx = buildContext(catalog.components, catalog.incompatibilities);
   const errors: OrderError[] = [];
 
-  // 1. Resolve every submitted id to a component of THIS line. Unknown ids and
-  //    components belonging to another line (e.g. a cross-line/street-legal part
-  //    smuggled in) are rejected — never silently dropped.
+  // 1. Resolve components to THIS line (reject unknown / foreign / duplicate).
   const selection: Selection = {};
   const idsByCategory = new Map<Category, string[]>();
   for (const id of request.componentIds) {
@@ -81,27 +75,52 @@ export function validateOrder(request: OrderRequest, catalog: Catalog): OrderVal
     idsByCategory.set(comp.category, list);
     selection[comp.category] = id;
   }
-
-  // 2. Reject duplicate selections within a category (two chassis, etc.).
   for (const [category, ids] of idsByCategory) {
     if (ids.length > 1) errors.push({ code: "duplicate_category", category, componentIds: ids });
   }
 
-  // 3. Completeness — every category must be chosen.
-  const missing = CATEGORY_ORDER.filter((c) => !selection[c]);
+  // 2. Completeness.
+  const missing = CATEGORY_ORDER.filter((cat) => !selection[cat]);
   if (missing.length > 0) errors.push({ code: "incomplete_build", missing });
 
-  // 4. Compatibility — the same engine rules that gate the UI, re-enforced here
-  //    in case a payload bypassed the UI (hub motor on full-suspension, a
-  //    battery that doesn't match the motor voltage, gated pairs, etc.).
+  // 3. Compatibility (re-enforce the UI's gating rules).
   for (const issue of validateBuild(selection, ctx).issues) {
     errors.push({ code: "incompatible", category: issue.category, reason: issue.reason });
   }
 
-  // 5. Authoritative price. Recompute from the trusted catalog and compare to
-  //    the client's claim. A mismatch means tampering OR a stale client price;
-  //    either way we refuse and hand back the real total to re-confirm.
-  const breakdown = priceSelection(catalog.line, selection, ctx);
+  // 4. Resolve extras (reject unknown / foreign / frame-incompatible). De-dupe.
+  const extrasById = new Map(catalog.extras.map((e) => [e.id, e]));
+  const frame = selectedFrameType(selection, ctx);
+  const validExtraIds: string[] = [];
+  const seenExtras = new Set<string>();
+  for (const id of request.extraIds ?? []) {
+    if (seenExtras.has(id)) continue;
+    seenExtras.add(id);
+    const extra = extrasById.get(id);
+    if (!extra) {
+      errors.push({ code: "unknown_extra", extraId: id });
+      continue;
+    }
+    if (extra.lineId !== catalog.line.id) {
+      errors.push({ code: "foreign_line_extra", extraId: id });
+      continue;
+    }
+    if (extra.compatibleFrameTypes && frame && !extra.compatibleFrameTypes.includes(frame)) {
+      errors.push({
+        code: "extra_frame_incompatible",
+        extraId: id,
+        reason: `${extra.name} isn’t available on this frame.`,
+      });
+      continue;
+    }
+    validExtraIds.push(id);
+  }
+
+  // 5. Authoritative price (components + valid extras). Never trust the client.
+  const breakdown = priceSelection(catalog.line, selection, ctx, {
+    all: catalog.extras,
+    selectedIds: validExtraIds,
+  });
   if (breakdown.totalCents !== request.expectedTotalCents) {
     errors.push({
       code: "price_mismatch",
@@ -114,6 +133,7 @@ export function validateOrder(request: OrderRequest, catalog: Catalog): OrderVal
     ok: errors.length === 0,
     errors,
     selection,
+    extraIds: validExtraIds,
     breakdown,
     totalCents: breakdown.totalCents,
   };

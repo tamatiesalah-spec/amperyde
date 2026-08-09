@@ -1,13 +1,13 @@
-// Placeholder bike art — a single source for the per-category layer PNGs/SVGs.
+// Placeholder bike art — one source for the per-category layer SVGs.
 //
-// Each function draws ONE category's layer in a SHARED coordinate space so the
+// Each painter draws ONE category's layer in a SHARED coordinate space so the
 // layers composite into a coherent side-profile bike when stacked. Real
-// photography or rendered turntable frames will replace these files (or the
-// component's asset reference will repoint to a CDN) category-by-category; the
-// compositing renderer neither knows nor cares which is in place.
+// photography / renders replace these per option; the compositing renderer
+// neither knows nor cares which is in place. Pure string-building (no React /
+// DOM) so it runs in Node (generators) and the browser (fallback) alike.
 //
-// Pure string-building (no React, no DOM) so it runs in Node (the file
-// generator) and in the browser (the missing-asset fallback) alike.
+// This is placeholder art: not every category renders a distinct shape (frame
+// size, accent colour, and finish type intentionally draw nothing).
 
 import type { Category, Component } from "@/domain/types";
 
@@ -20,26 +20,42 @@ export interface Region {
   h: number;
 }
 
+const FULL: Region = { x: 150, y: 150, w: 700, h: 380 };
+const FRONT_WHEEL: Region = { x: 560, y: 300, w: 380, h: 320 };
+const COCKPIT: Region = { x: 590, y: 120, w: 320, h: 260 };
+
 // Zoom targets (in viewBox units) for each configurator step.
 export const FOCUS_REGIONS: Record<Category, Region> = {
-  chassis: { x: 150, y: 150, w: 700, h: 380 },
-  wheels: { x: 560, y: 300, w: 380, h: 320 },
-  motor: { x: 200, y: 330, w: 360, h: 260 },
-  battery: { x: 380, y: 250, w: 260, h: 250 },
+  chassis: FULL,
+  wheel_size: FRONT_WHEEL,
+  frame_size: FULL,
+  motor: { x: 200, y: 330, w: 380, h: 270 },
+  battery: { x: 360, y: 240, w: 300, h: 260 },
   brakes: { x: 590, y: 320, w: 300, h: 300 },
-  cockpit: { x: 590, y: 120, w: 320, h: 260 },
-  finish: { x: 150, y: 150, w: 700, h: 380 },
+  brake_disc: { x: 590, y: 320, w: 300, h: 300 },
+  tyres: FRONT_WHEEL,
+  handlebar: COCKPIT,
+  seatpost: { x: 300, y: 150, w: 260, h: 260 },
+  main_colour: FULL,
+  accent_colour: COCKPIT,
+  finish_type: FULL,
 };
 
 // Layer paint order (low draws first / behind).
 export const LAYER_Z: Record<Category, number> = {
-  wheels: 10,
+  wheel_size: 10,
+  tyres: 12,
   chassis: 20,
-  brakes: 25,
+  seatpost: 22,
+  brake_disc: 24,
   battery: 30,
   motor: 40,
-  finish: 50,
-  cockpit: 60,
+  brakes: 44,
+  main_colour: 46,
+  accent_colour: 47,
+  finish_type: 48,
+  frame_size: 5,
+  handlebar: 60,
 };
 
 // --- Geometry -------------------------------------------------------------
@@ -52,7 +68,6 @@ const HEAD_BOT = { x: 650, y: 300 };
 
 const C = {
   steel: "#b3b9c4",
-  carbon: "#33353f",
   tire: "#141519",
   rim: "#cbd0d8",
   spoke: "#7d828d",
@@ -61,16 +76,11 @@ const C = {
   batt: "#22242c",
   battTop: "#2d303a",
   brand: "#e23a34",
-  line: "#dcdcd8",
 };
 
-// --- Primitives -----------------------------------------------------------
 const line = (x1: number, y1: number, x2: number, y2: number, stroke: string, w: number, cap = "round") =>
   `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${w}" stroke-linecap="${cap}"/>`;
-
-const circle = (cx: number, cy: number, r: number, attrs: string) =>
-  `<circle cx="${cx}" cy="${cy}" r="${r}" ${attrs}/>`;
-
+const circle = (cx: number, cy: number, r: number, attrs: string) => `<circle cx="${cx}" cy="${cy}" r="${r}" ${attrs}/>`;
 const angle = (ax: number, ay: number, bx: number, by: number) => (Math.atan2(by - ay, bx - ax) * 180) / Math.PI;
 
 // =========================================================================
@@ -78,54 +88,35 @@ const angle = (ax: number, ay: number, bx: number, by: number) => (Math.atan2(by
 // =========================================================================
 
 function chassisLayer(comp: Component): string {
-  const carbon = comp.id.includes("carbon");
-  const col = carbon ? C.carbon : C.steel;
+  const col = C.steel;
   const full = comp.frameType === "full_suspension";
   const w = 17;
-
-  const parts: string[] = [];
-  // Front triangle (shared).
-  parts.push(line(BB.x, BB.y, HEAD_BOT.x, HEAD_BOT.y, col, w)); // down tube
-  parts.push(line(SEAT.x, SEAT.y, HEAD_TOP.x, HEAD_TOP.y, col, w)); // top tube
-  parts.push(line(BB.x, BB.y, SEAT.x, SEAT.y, col, w)); // seat tube
-  parts.push(line(HEAD_BOT.x, HEAD_BOT.y, HEAD_TOP.x, HEAD_TOP.y, col, w + 4)); // head tube
-
+  const parts: string[] = [
+    line(BB.x, BB.y, HEAD_BOT.x, HEAD_BOT.y, col, w), // down tube
+    line(SEAT.x, SEAT.y, HEAD_TOP.x, HEAD_TOP.y, col, w), // top tube
+    line(BB.x, BB.y, SEAT.x, SEAT.y, col, w), // seat tube
+    line(HEAD_BOT.x, HEAD_BOT.y, HEAD_TOP.x, HEAD_TOP.y, col, w + 4), // head tube
+    line(HEAD_TOP.x, HEAD_TOP.y, FRONT.cx, FRONT.cy, col, 13), // fork
+    circle(BB.x, BB.y, 15, `fill="${C.hub}" stroke="${C.metal}" stroke-width="3"`), // BB
+  ];
   if (full) {
-    // Swingarm + shock + pivot.
-    parts.push(line(BB.x + 4, BB.y - 6, REAR.cx, REAR.cy, col, w)); // upper swingarm
-    parts.push(line(REAR.cx, REAR.cy, 452, 372, col, 12)); // seatstay link
-    parts.push(line(452, 372, 470, 300, "#5a5e68", 14)); // shock body
-    parts.push(circle(BB.x + 6, BB.y - 8, 12, `fill="${C.hub}" stroke="${C.metal}" stroke-width="3"`)); // main pivot
+    parts.push(line(BB.x + 4, BB.y - 6, REAR.cx, REAR.cy, col, w));
+    parts.push(line(REAR.cx, REAR.cy, 452, 372, col, 12));
+    parts.push(line(452, 372, 470, 300, "#5a5e68", 14)); // shock
+    parts.push(circle(BB.x + 6, BB.y - 8, 12, `fill="${C.hub}" stroke="${C.metal}" stroke-width="3"`));
   } else {
-    // Rigid rear triangle.
-    parts.push(line(BB.x, BB.y, REAR.cx, REAR.cy, col, w)); // chain stay
-    parts.push(line(REAR.cx, REAR.cy, SEAT.x, SEAT.y, col, w)); // seat stay
+    parts.push(line(BB.x, BB.y, REAR.cx, REAR.cy, col, w));
+    parts.push(line(REAR.cx, REAR.cy, SEAT.x, SEAT.y, col, w));
   }
-
-  // Fork + steerer + seatpost + saddle + crank.
-  parts.push(line(HEAD_TOP.x, HEAD_TOP.y, FRONT.cx, FRONT.cy, col, 13)); // fork
-  parts.push(line(SEAT.x, SEAT.y, SEAT.x - 6, SEAT.y - 44, C.metal, 9)); // seatpost
-  parts.push(`<rect x="${SEAT.x - 44}" y="${SEAT.y - 60}" width="86" height="16" rx="8" fill="${C.hub}"/>`); // saddle
-  parts.push(circle(BB.x, BB.y, 15, `fill="${C.hub}" stroke="${C.metal}" stroke-width="3"`)); // BB
   return parts.join("");
 }
 
-function wheelsLayer(comp: Component): string {
-  const supermoto = comp.id.includes("supermoto");
+function wheelSizeLayer(comp: Component): string {
   const mullet = comp.id.includes("mullet");
-  const rRear = mullet ? 138 : supermoto ? 132 : 150;
-  const rFront = mullet ? 156 : supermoto ? 132 : 150;
-  const tireW = supermoto ? 18 : 30;
-
-  const tread: Record<string, string> = {
-    knobby: "20 14",
-    dualsport: "10 12",
-    supermoto: "0",
-    mullet: "18 12",
-  };
-  const key = comp.id.replace("wheels-", "");
-  const dash = tread[key] ?? "12 12";
-
+  const big = comp.id.includes("29");
+  const rRear = mullet ? 138 : big ? 152 : 142;
+  const rFront = mullet ? 152 : big ? 152 : 142;
+  const tireW = 26;
   const wheel = (cx: number, cy: number, r: number): string => {
     const spokes: string[] = [];
     for (let i = 0; i < 12; i++) {
@@ -133,22 +124,27 @@ function wheelsLayer(comp: Component): string {
       spokes.push(line(cx, cy, cx + Math.cos(a) * (r - tireW - 6), cy + Math.sin(a) * (r - tireW - 6), C.spoke, 2));
     }
     return [
-      circle(cx, cy, r, `fill="none" stroke="${C.tire}" stroke-width="${tireW}"`), // tire
-      dash !== "0"
-        ? circle(cx, cy, r, `fill="none" stroke="#0c0d10" stroke-width="${tireW}" stroke-dasharray="${dash}"`)
-        : "", // tread
-      circle(cx, cy, r - tireW - 3, `fill="none" stroke="${C.rim}" stroke-width="5"`), // rim
+      circle(cx, cy, r, `fill="none" stroke="${C.tire}" stroke-width="${tireW}"`),
+      circle(cx, cy, r - tireW - 3, `fill="none" stroke="${C.rim}" stroke-width="5"`),
       ...spokes,
-      circle(cx, cy, 12, `fill="${C.hub}"`), // hub
+      circle(cx, cy, 12, `fill="${C.hub}"`),
     ].join("");
   };
-
   return wheel(REAR.cx, REAR.cy, rRear) + wheel(FRONT.cx, FRONT.cy, rFront);
+}
+
+function tyresLayer(comp: Component): string {
+  const dash: Record<string, string> = { "tyres-mtb": "20 14", "tyres-dualsport": "10 12", "tyres-supermoto": "3 22" };
+  const d = dash[comp.id] ?? "12 12";
+  const r = 150;
+  const tread = (cx: number, cy: number) =>
+    circle(cx, cy, r, `fill="none" stroke="#0b0c0f" stroke-width="26" stroke-dasharray="${d}"`);
+  return tread(REAR.cx, REAR.cy) + tread(FRONT.cx, FRONT.cy);
 }
 
 function motorLayer(comp: Component): string {
   if (comp.motorType === "hub") {
-    const r = comp.id.includes("1500") ? 64 : 56;
+    const r = comp.id.includes("1500") ? 64 : comp.id.includes("1000") ? 58 : 52;
     const fins: string[] = [];
     for (let i = 0; i < 16; i++) {
       const a = (i / 16) * Math.PI * 2;
@@ -161,8 +157,7 @@ function motorLayer(comp: Component): string {
       circle(REAR.cx, REAR.cy, 10, `fill="${C.metal}"`),
     ].join("");
   }
-  // Mid-drive block near the bottom bracket.
-  const big = comp.id.includes("5000");
+  const big = comp.id.includes("tsdz16");
   const w = big ? 150 : 122;
   const h = big ? 118 : 98;
   const x = BB.x - w / 2 + 6;
@@ -170,97 +165,113 @@ function motorLayer(comp: Component): string {
   const fins: string[] = [];
   for (let i = 1; i < 6; i++) fins.push(line(x + 14, y + i * (h / 6), x + w - 14, y + i * (h / 6), "#4c505a", 4));
   return [
-    `<path d="M${x} ${y + 18} Q${x} ${y} ${x + 18} ${y} L${x + w - 18} ${y} Q${x + w} ${y} ${x + w} ${y + 18} L${x + w} ${y + h - 18} Q${x + w} ${y + h} ${x + w - 18} ${y + h} L${x + 18} ${y + h} Q${x} ${y + h} ${x} ${y + h - 18} Z" fill="${C.hub}" stroke="${C.metal}" stroke-width="3"/>`,
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="18" fill="${C.hub}" stroke="${C.metal}" stroke-width="3"/>`,
     ...fins,
     `<rect x="${x + 16}" y="${y + h - 22}" width="${w - 32}" height="6" rx="3" fill="${C.brand}" opacity="0.85"/>`,
-    circle(BB.x, BB.y, 22, `fill="none" stroke="${C.metal}" stroke-width="5"`), // chainring hint
+    circle(BB.x, BB.y, 22, `fill="none" stroke="${C.metal}" stroke-width="5"`),
   ].join("");
 }
 
 function batteryLayer(comp: Component): string {
   const v = comp.voltage ?? 48;
-  const lenMap: Record<number, number> = { 48: 168, 52: 190, 60: 216, 72: 246 };
-  const len = lenMap[v] ?? 180;
-  const wdt = 58;
-  // Seat along the down tube.
-  const mx = (BB.x + HEAD_BOT.x) / 2;
-  const my = (BB.y + HEAD_BOT.y) / 2;
-  const rot = angle(BB.x, BB.y, HEAD_BOT.x, HEAD_BOT.y);
-  const cells = Math.round(v / 12);
-  const leds: string[] = [];
-  for (let i = 0; i < cells; i++) {
-    leds.push(`<rect x="${-len / 2 + 16 + i * ((len - 32) / cells)}" y="${wdt / 2 - 12}" width="${(len - 40) / cells}" height="5" rx="2.5" fill="${C.brand}" opacity="0.85"/>`);
+  const len = v >= 52 ? 200 : 176;
+  const wdt = 54;
+  const pack = (mx: number, my: number, rot: number) =>
+    `<g transform="translate(${mx} ${my}) rotate(${rot})">
+      <rect x="${-len / 2}" y="${-wdt / 2}" width="${len}" height="${wdt}" rx="14" fill="${C.batt}" stroke="${C.battTop}" stroke-width="3"/>
+      <rect x="${-len / 2 + 8}" y="${-wdt / 2 + 8}" width="${len - 16}" height="12" rx="6" fill="${C.battTop}"/>
+      <rect x="${-len / 2 + 14}" y="${wdt / 2 - 12}" width="${len - 28}" height="5" rx="2.5" fill="${C.brand}" opacity="0.85"/>
+    </g>`;
+  const dtMx = (BB.x + HEAD_BOT.x) / 2;
+  const dtMy = (BB.y + HEAD_BOT.y) / 2;
+  const dtRot = angle(BB.x, BB.y, HEAD_BOT.x, HEAD_BOT.y);
+
+  if (comp.id.includes("triangle")) {
+    // In-frame triangle pack.
+    return `<path d="M${BB.x + 8} ${BB.y - 12} L${SEAT.x + 8} ${SEAT.y + 16} L${HEAD_BOT.x - 20} ${HEAD_BOT.y - 6} Z" fill="${C.batt}" stroke="${C.battTop}" stroke-width="3"/>`;
   }
-  return `<g transform="translate(${mx} ${my}) rotate(${rot})">
-    <rect x="${-len / 2}" y="${-wdt / 2}" width="${len}" height="${wdt}" rx="14" fill="${C.batt}" stroke="${C.battTop}" stroke-width="3"/>
-    <rect x="${-len / 2 + 8}" y="${-wdt / 2 + 8}" width="${len - 16}" height="14" rx="7" fill="${C.battTop}"/>
-    ${leds.join("")}
-  </g>`;
+  if (comp.id.includes("dual")) {
+    // Down tube + a second pack under the top tube.
+    const ttMx = (SEAT.x + HEAD_TOP.x) / 2;
+    const ttMy = (SEAT.y + HEAD_TOP.y) / 2 + 18;
+    return pack(dtMx, dtMy, dtRot) + pack(ttMx, ttMy, angle(SEAT.x, SEAT.y, HEAD_TOP.x, HEAD_TOP.y));
+  }
+  return pack(dtMx, dtMy, dtRot);
 }
 
-function brakesLayer(comp: Component): string {
-  const r = comp.id.includes("203") ? 82 : comp.id.includes("4piston") ? 70 : 58;
-  const rotor = (cx: number, cy: number): string => {
+function brakeDiscLayer(comp: Component): string {
+  const r = comp.id.includes("220") ? 84 : comp.id.includes("200") ? 74 : 62;
+  const rotor = (cx: number, cy: number) => {
     const holes: string[] = [];
     for (let i = 0; i < 10; i++) {
       const a = (i / 10) * Math.PI * 2;
       holes.push(circle(cx + Math.cos(a) * (r - 12), cy + Math.sin(a) * (r - 12), 3, `fill="#0b0c0f"`));
     }
-    return [
-      circle(cx, cy, r, `fill="none" stroke="${C.metal}" stroke-width="4"`),
-      circle(cx, cy, r - 6, `fill="none" stroke="#6b6f79" stroke-width="1.5"`),
-      ...holes,
-      // caliper at top of rotor
-      `<rect x="${cx - 12}" y="${cy - r - 12}" width="24" height="30" rx="5" fill="${C.hub}" stroke="${C.brand}" stroke-width="2"/>`,
-    ].join("");
+    return [circle(cx, cy, r, `fill="none" stroke="${C.metal}" stroke-width="4"`), circle(cx, cy, r - 6, `fill="none" stroke="#6b6f79" stroke-width="1.5"`), ...holes].join("");
   };
   return rotor(FRONT.cx, FRONT.cy) + rotor(REAR.cx, REAR.cy);
 }
 
-function cockpitLayer(comp: Component): string {
+function brakesLayer(comp: Component): string {
+  const hydraulic = comp.id.includes("hydraulic");
+  const stroke = hydraulic ? C.brand : C.metal;
+  const cal = (cx: number, cy: number) =>
+    `<rect x="${cx - 12}" y="${cy - 82}" width="${hydraulic ? 28 : 22}" height="${hydraulic ? 34 : 28}" rx="5" fill="${C.hub}" stroke="${stroke}" stroke-width="2"/>`;
+  return cal(FRONT.cx, FRONT.cy) + cal(REAR.cx, REAR.cy);
+}
+
+function handlebarLayer(comp: Component): string {
   const riser = comp.id.includes("riser");
-  const pro = comp.id.includes("display-pro");
   const barTop = HEAD_TOP.y - (riser ? 78 : 54);
-  const parts: string[] = [
-    line(HEAD_TOP.x, HEAD_TOP.y, HEAD_TOP.x + 6, barTop, C.metal, 10), // stem/steerer riser
-    line(HEAD_TOP.x - 40, barTop, HEAD_TOP.x + 58, barTop - 10, C.hub, 13), // handlebar
+  return [
+    line(HEAD_TOP.x, HEAD_TOP.y, HEAD_TOP.x + 6, barTop, C.metal, 10),
+    line(HEAD_TOP.x - 40, barTop, HEAD_TOP.x + 58, barTop - 10, C.hub, 13),
     line(HEAD_TOP.x - 40, barTop, HEAD_TOP.x - 62, barTop + 6, C.tire, 16), // grip
-  ];
-  // Display.
-  const dw = pro ? 62 : 40;
-  const dh = pro ? 40 : 26;
-  parts.push(`<rect x="${HEAD_TOP.x - 4}" y="${barTop - dh - 6}" width="${dw}" height="${dh}" rx="6" fill="#0d0e12" stroke="${C.metal}" stroke-width="2"/>`);
-  parts.push(`<rect x="${HEAD_TOP.x}" y="${barTop - dh - 2}" width="${dw - 8}" height="${dh - 8}" rx="3" fill="${pro ? C.brand : "#33363f"}" opacity="${pro ? 0.85 : 1}"/>`);
+    `<rect x="${HEAD_TOP.x - 4}" y="${barTop - 32}" width="48" height="26" rx="6" fill="#0d0e12" stroke="${C.metal}" stroke-width="2"/>`,
+  ].join("");
+}
+
+function seatpostLayer(comp: Component): string {
+  const susp = comp.id.includes("suspension");
+  const parts: string[] = [];
+  if (susp) {
+    parts.push(line(SEAT.x, SEAT.y, SEAT.x - 2, SEAT.y - 26, C.metal, 9));
+    parts.push(line(SEAT.x - 2, SEAT.y - 26, SEAT.x - 26, SEAT.y - 40, C.hub, 9)); // parallelogram link
+    parts.push(line(SEAT.x - 26, SEAT.y - 40, SEAT.x - 24, SEAT.y - 58, C.metal, 8));
+    parts.push(`<rect x="${SEAT.x - 64}" y="${SEAT.y - 72}" width="86" height="16" rx="8" fill="${C.hub}"/>`);
+  } else {
+    parts.push(line(SEAT.x, SEAT.y, SEAT.x - 6, SEAT.y - 44, C.metal, 9));
+    parts.push(`<rect x="${SEAT.x - 44}" y="${SEAT.y - 60}" width="86" height="16" rx="8" fill="${C.hub}"/>`);
+  }
   return parts.join("");
 }
 
-function finishLayer(comp: Component): string {
-  const colors: Record<string, string> = {
-    "finish-stealth": "#1c1d22",
-    "finish-desert": "#b9976b",
-    "finish-forged-carbon": "#3b3e47",
-  };
-  const paint = colors[comp.id] ?? "#1c1d22";
-  const weave = comp.id.includes("carbon")
-    ? `<pattern id="weave" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" fill="${paint}"/><line x1="0" y1="0" x2="0" y2="10" stroke="#4a4d57" stroke-width="3"/></pattern>`
-    : "";
-  const fill = weave ? "url(#weave)" : paint;
-  return `${weave ? `<defs>${weave}</defs>` : ""}
-    <!-- top-tube tank panel -->
-    <path d="M${SEAT.x + 20} ${SEAT.y - 6} L${HEAD_TOP.x - 30} ${HEAD_TOP.y - 4} L${HEAD_TOP.x - 30} ${HEAD_TOP.y + 20} L${SEAT.x + 20} ${SEAT.y + 22} Z" fill="${fill}" opacity="0.92"/>
-    <!-- front number plate -->
-    <path d="M${HEAD_TOP.x + 10} ${HEAD_TOP.y + 6} q40 6 44 74 l-30 6 q-14 -44 -32 -60 Z" fill="${fill}" opacity="0.92"/>
-    <rect x="${SEAT.x + 30}" y="${SEAT.y + 2}" width="70" height="4" rx="2" fill="${C.brand}" opacity="0.7"/>`;
+function mainColourLayer(comp: Component): string {
+  const paint = comp.swatch ?? "#1c1d22";
+  // Tint the main tubes and a tank panel in the chosen colour.
+  return [
+    line(BB.x, BB.y, HEAD_BOT.x, HEAD_BOT.y, paint, 10),
+    line(SEAT.x, SEAT.y, HEAD_TOP.x, HEAD_TOP.y, paint, 10),
+    `<path d="M${SEAT.x + 20} ${SEAT.y - 4} L${HEAD_TOP.x - 30} ${HEAD_TOP.y - 2} L${HEAD_TOP.x - 30} ${HEAD_TOP.y + 18} L${SEAT.x + 20} ${SEAT.y + 20} Z" fill="${paint}" opacity="0.9"/>`,
+  ].join("");
 }
+
+const NONE = () => "";
 
 const PAINTERS: Record<Category, (c: Component) => string> = {
   chassis: chassisLayer,
-  wheels: wheelsLayer,
+  wheel_size: wheelSizeLayer,
+  frame_size: NONE,
   motor: motorLayer,
   battery: batteryLayer,
   brakes: brakesLayer,
-  cockpit: cockpitLayer,
-  finish: finishLayer,
+  brake_disc: brakeDiscLayer,
+  tyres: tyresLayer,
+  handlebar: handlebarLayer,
+  seatpost: seatpostLayer,
+  main_colour: mainColourLayer,
+  accent_colour: NONE,
+  finish_type: NONE,
 };
 
 /** Inner SVG markup for a single component's layer (no <svg> wrapper). */

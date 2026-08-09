@@ -3,10 +3,12 @@
 Premium e-commerce experience for a custom **off-road electric bike** brand:
 a data-driven, compatibility-gated bike configurator with live pricing.
 
-> **Non-negotiable:** the off-road line and the street-legal conversion kit are
-> separate, non-cross-marketed products on separate surfaces. There is no shared
-> mode/toggle, no cross-sell, and no bundling anywhere in the UI, data model, or
-> checkout. This repo currently models the **off-road line only**.
+> **Street-legal (updated by product decision):** the original brief kept the
+> street-legal kit fully separate. Per an explicit later decision, the **Street
+> Legal Kit is now an EXTRA add-on** (a pedal conversion + power/speed-limiting
+> documentation) that can be added to any build to make it road-legal. A build
+> without it is **private-terrain only** and carries a prominent no-liability
+> disclaimer, emphasised throughout the configurator. Pricing is in **EUR**.
 
 ## Status — build increments 1–4 of 5 complete
 

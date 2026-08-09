@@ -1,37 +1,56 @@
 // AMPERYDE domain types — pure, framework-free. Mirrors supabase/migrations.
 //
-// NON-NEGOTIABLE: these types model the OFF-ROAD line only. The street-legal
-// conversion kit is a separate product with its own types/surfaces and must
-// never be represented as a mode/variant here.
+// The catalog models the OFF-ROAD MTB build. The Street Legal Kit is an
+// EXTRA add-on (pedal conversion + power/speed-limiting docs) that can be added
+// to any bike; when fitted it makes the build road-legal. Without it, a build is
+// private-terrain only (see the disclaimer surfaced in the configurator).
 
 export type Category =
   | "chassis"
-  | "wheels"
+  | "wheel_size"
+  | "frame_size"
   | "motor"
   | "battery"
   | "brakes"
-  | "cockpit"
-  | "finish";
+  | "brake_disc"
+  | "tyres"
+  | "handlebar"
+  | "seatpost"
+  | "main_colour"
+  | "accent_colour"
+  | "finish_type";
 
 /** The guided configurator visits categories in this order. */
 export const CATEGORY_ORDER: readonly Category[] = [
   "chassis",
-  "wheels",
+  "wheel_size",
+  "frame_size",
   "motor",
   "battery",
   "brakes",
-  "cockpit",
-  "finish",
+  "brake_disc",
+  "tyres",
+  "handlebar",
+  "seatpost",
+  "main_colour",
+  "accent_colour",
+  "finish_type",
 ] as const;
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   chassis: "Chassis",
-  wheels: "Wheels & Tires",
+  wheel_size: "Wheel Size",
+  frame_size: "Frame Size",
   motor: "Motor",
   battery: "Battery",
   brakes: "Brakes",
-  cockpit: "Cockpit",
-  finish: "Finish",
+  brake_disc: "Brake Discs",
+  tyres: "Tyres",
+  handlebar: "Handlebar",
+  seatpost: "Seatpost",
+  main_colour: "Main Colour",
+  accent_colour: "Accent Colour",
+  finish_type: "Finish",
 };
 
 export type FrameType = "hardtail" | "full_suspension";
@@ -59,15 +78,34 @@ export interface Component {
 
   /** MOTOR ONLY: drive type. */
   motorType?: MotorType;
-  /** MOTOR + BATTERY: nominal voltage. Battery must match the selected motor. */
+  /** BATTERY: nominal voltage (informational / art only — no matching rule). */
   voltage?: number;
 
-  /** Compositing base layer PNG. */
+  /** A hex colour, for swatch categories (main/accent colour). */
+  swatch?: string;
+
+  /** Compositing base layer image. */
   layerAsset: string;
   /** Dedicated close-up asset for the zoom interaction (where applicable). */
   closeupAsset?: string;
 
   isDefault: boolean;
+  sortOrder: number;
+}
+
+/** Optional multi-select add-on, priced on top of the build. */
+export interface Extra {
+  id: string;
+  lineId: string;
+  name: string;
+  description?: string;
+  priceDeltaCents: number;
+  /** If set, only offered when the selected chassis frame matches. */
+  compatibleFrameTypes?: FrameType[];
+  /** Emphasised note (e.g. legality / liability). */
+  note?: string;
+  /** When fitted, the build is road-legal (suppresses the private-terrain disclaimer). */
+  enablesStreetLegal?: boolean;
   sortOrder: number;
 }
 
@@ -85,6 +123,8 @@ export interface ProductLine {
   description?: string;
   /** Starting price of a base build, before positive component deltas. */
   basePriceCents: number;
+  /** ISO 4217 currency for display/formatting. */
+  currency: string;
 }
 
 /** A "Rider's Choice" preset: a named, complete, editable build at a price tier. */
@@ -97,16 +137,22 @@ export interface Preset {
   heroAsset?: string;
   /** One component id per category. */
   componentIds: string[];
+  /** Preselected extras. */
+  extraIds?: string[];
   sortOrder: number;
 }
 
 /** A build in progress: at most one selected component id per category. */
 export type Selection = Partial<Record<Category, string>>;
 
+/** Selected optional add-ons (ids into Catalog.extras). */
+export type ExtraSelection = string[];
+
 /** Everything the engines need to reason about a line. */
 export interface Catalog {
   line: ProductLine;
   components: Component[];
+  extras: Extra[];
   incompatibilities: IncompatibilityRule[];
   presets: Preset[];
 }

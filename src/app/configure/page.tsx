@@ -22,6 +22,7 @@ export default async function ConfigurePage(props: PageProps<"/configure">) {
     <Configurator
       catalog={catalog}
       initialComponentIds={preset?.componentIds}
+      initialExtraIds={preset?.extraIds}
       presetName={preset?.name}
     />
   );

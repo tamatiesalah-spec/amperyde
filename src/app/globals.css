@@ -25,6 +25,9 @@
   --color-steel: #9a9c9e;
   --color-steel-dim: #6a6c70;
 
+  /* Warning / caution (disclaimers, incompatibility reasons). */
+  --color-ember: #ff8c3d;
+
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
