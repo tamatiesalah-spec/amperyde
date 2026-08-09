@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:seed-sql": "node scripts/generate-seed-sql.mts",
-    "art:placeholders": "node scripts/generate-placeholder-art.mts"
+    "art:placeholders": "node scripts/generate-placeholder-art.mts",
+    "art:hero": "node scripts/generate-hero-frames.mts"
   },
   "dependencies": {
     "framer-motion": "^13.0.0",

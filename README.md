@@ -8,7 +8,7 @@ a data-driven, compatibility-gated bike configurator with live pricing.
 > mode/toggle, no cross-sell, and no bundling anywhere in the UI, data model, or
 > checkout. This repo currently models the **off-road line only**.
 
-## Status — build increment 1 of 5
+## Status — build increments 1–4 of 5 complete
 
 Following the brief's build order (data model → configurator → compositing/zoom
 → cinematic hero → checkout):
@@ -17,8 +17,18 @@ Following the brief's build order (data model → configurator → compositing/z
 - ✅ **Bare-bones configurator with live pricing** — guided flow
 - ✅ **Layered image compositing + zoom interactions** — stacked per-category layers,
   real-time swaps, CSS-transform zoom/pan into each region
-- ⬜ Landing-page cinematic scroll-scrub hero
+- ✅ **Landing-page cinematic scroll-scrub hero** — preloaded canvas image sequence,
+  scroll maps to frame index; scroll-triggered reveal sections below
 - ⬜ Cart / checkout with server-side price re-validation
+
+### Hero (scroll-scrub)
+
+`ScrollScrubHero` preloads a frame sequence and draws the current frame to a
+`<canvas>`, mapping scroll position through a tall sticky container to a frame
+index (the "Apple product page" technique — not a video). Redraws happen only on
+frame-index change inside one `requestAnimationFrame`; the canvas is DPR-aware
+and resize-safe. Frames come from `heroFrameUrl()` — placeholder SVGs generated
+by `npm run art:hero`, repointable to real turntable frames / a CDN sequence.
 
 ### Compositing & assets
 
