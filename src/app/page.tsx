@@ -31,7 +31,7 @@ export default function Home() {
       {/* Persistent brand header */}
       <header className="fixed inset-x-0 top-0 z-30 flex items-center justify-between px-6 py-4">
         <Link href="/" aria-label="AMPERYDE home">
-          <BrandLogo className="h-7 w-auto" />
+          <BrandLogo className="h-14 w-auto" />
         </Link>
         <nav className="flex items-center gap-6 text-sm text-muted">
           <Link href="/riders-choice" className="transition hover:text-ink">

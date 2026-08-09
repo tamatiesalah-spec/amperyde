@@ -87,7 +87,7 @@ export function Configurator({ catalog, initialComponentIds, presetName }: Props
       <header className="flex items-center justify-between border-b border-line px-6 py-4">
         <div className="flex items-center gap-4">
           <Link href="/" aria-label="AMPERYDE home">
-            <BrandLogo className="h-8 w-auto" />
+            <BrandLogo className="h-14 w-auto" />
           </Link>
           <span className="text-faint">/</span>
           <span className="text-sm text-muted">
