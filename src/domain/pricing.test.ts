@@ -30,8 +30,8 @@ describe("priceSelection", () => {
   it("adds selected extras on top of the components", () => {
     const sel = selectionFromComponentIds(offRoadCatalog.presets[2].componentIds, ctx); // Apex
     const componentsOnly = priceSelection(line, sel, ctx).totalCents;
-    const withExtras = priceSelection(line, sel, ctx, extrasCtx(["extra-lights", "extra-street-legal-kit"]));
-    expect(withExtras.totalCents).toBe(componentsOnly + 9000 + 45000);
+    const withExtras = priceSelection(line, sel, ctx, extrasCtx(["extra-lights", "extra-helmet"]));
+    expect(withExtras.totalCents).toBe(componentsOnly + 9000 + 12000);
     expect(withExtras.extraItems).toHaveLength(2);
   });
 
@@ -44,8 +44,8 @@ describe("priceSelection", () => {
   it("prices the Apex preset (components + preset extras) as expected", () => {
     const sel = selectionFromComponentIds(offRoadCatalog.presets[2].componentIds, ctx);
     const p = priceSelection(line, sel, ctx, extrasCtx(offRoadCatalog.presets[2].extraIds ?? []));
-    // components 499000 + extras (fairings 35000 + lights 9000 + street-legal 45000)
-    expect(p.totalCents).toBe(499000 + 89000);
+    // components 499000 + extras (fairings 35000 + lights 9000)
+    expect(p.totalCents).toBe(499000 + 44000);
   });
 });
 

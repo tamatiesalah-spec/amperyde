@@ -12,10 +12,9 @@ import type { BuildValidity } from "@/domain/compatibility";
 interface Props {
   price: PriceBreakdown;
   validity: BuildValidity;
-  streetLegal: boolean;
 }
 
-export function PriceBar({ price, validity, streetLegal }: Props) {
+export function PriceBar({ price, validity }: Props) {
   const [open, setOpen] = useState(false);
   const ready = validity.complete && validity.valid;
   const cur = price.currency;
@@ -70,9 +69,7 @@ export function PriceBar({ price, validity, streetLegal }: Props) {
         <div className="ml-auto flex items-center gap-4">
           <span className={`hidden text-sm sm:inline ${ready ? "text-brand" : "text-faint"}`}>
             {ready
-              ? streetLegal
-                ? "Ready to build · road-legal"
-                : "Ready to build · private terrain"
+              ? "Ready to build · private terrain"
               : !validity.complete
                 ? "Select every component"
                 : validity.issues[0]?.reason ?? "Resolve conflicts"}

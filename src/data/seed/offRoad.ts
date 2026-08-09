@@ -41,21 +41,25 @@ const components: Component[] = [
     description: "Rider height ~186–196 cm.", priceDeltaCents: 0, layerAsset: asset("frame_size", "xl"), isDefault: false, sortOrder: 30 }),
 
   // --- Q4 MOTOR (hub motors are hardtail-only) -----------------------------
+  // acceptedVoltages is an ENGINEERING-DEFAULT PLACEHOLDER pending real spec
+  // confirmation: 48V is the universal tier; 52V is gated to the higher-power
+  // motors (1500W hub, TSDZ16). Wrong voltage into a controller can destroy it,
+  // so the engine treats this as a hard safety gate.
   c({ id: "motor-hub-750", lineId: LINE_ID, category: "motor", name: "750W Hub Motor",
     description: "Quiet, low-maintenance rear hub drive.", priceDeltaCents: 0, motorType: "hub",
-    compatibleFrameTypes: ["hardtail"], layerAsset: asset("motor", "hub-750"), isDefault: true, sortOrder: 10 }),
+    acceptedVoltages: [48], compatibleFrameTypes: ["hardtail"], layerAsset: asset("motor", "hub-750"), isDefault: true, sortOrder: 10 }),
   c({ id: "motor-hub-1000", lineId: LINE_ID, category: "motor", name: "1000W Hub Motor",
     description: "More punch, still hub-simple.", priceDeltaCents: 15000, motorType: "hub",
-    compatibleFrameTypes: ["hardtail"], layerAsset: asset("motor", "hub-1000"), isDefault: false, sortOrder: 20 }),
+    acceptedVoltages: [48], compatibleFrameTypes: ["hardtail"], layerAsset: asset("motor", "hub-1000"), isDefault: false, sortOrder: 20 }),
   c({ id: "motor-hub-1500", lineId: LINE_ID, category: "motor", name: "1500W Hub Motor",
     description: "Maximum hub power.", priceDeltaCents: 30000, motorType: "hub",
-    compatibleFrameTypes: ["hardtail"], layerAsset: asset("motor", "hub-1500"), isDefault: false, sortOrder: 30 }),
+    acceptedVoltages: [48, 52], compatibleFrameTypes: ["hardtail"], layerAsset: asset("motor", "hub-1500"), isDefault: false, sortOrder: 30 }),
   c({ id: "motor-tsdz8", lineId: LINE_ID, category: "motor", name: "TSDZ8 Mid Drive",
     description: "Torque-sensing mid-drive, central mass.", priceDeltaCents: 45000, motorType: "mid_drive",
-    layerAsset: asset("motor", "tsdz8"), isDefault: false, sortOrder: 40 }),
+    acceptedVoltages: [48], layerAsset: asset("motor", "tsdz8"), isDefault: false, sortOrder: 40 }),
   c({ id: "motor-tsdz16", lineId: LINE_ID, category: "motor", name: "TSDZ16 Mid Drive",
     description: "High-output mid-drive for the full send.", priceDeltaCents: 80000, motorType: "mid_drive",
-    layerAsset: asset("motor", "tsdz16"), isDefault: false, sortOrder: 50 }),
+    acceptedVoltages: [48, 52], layerAsset: asset("motor", "tsdz16"), isDefault: false, sortOrder: 50 }),
 
   // --- Q5 BATTERY (triangle packs are hardtail-only) -----------------------
   c({ id: "battery-downtube-48", lineId: LINE_ID, category: "battery", name: "Downtube 48V",
@@ -103,6 +107,17 @@ const components: Component[] = [
   c({ id: "seatpost-suspension", lineId: LINE_ID, category: "seatpost", name: "Parallelogram Suspension Seatpost",
     description: "Adds rear comfort on hardtails.", priceDeltaCents: 14000, compatibleFrameTypes: ["hardtail"], layerAsset: asset("seatpost", "suspension"), isDefault: false, sortOrder: 20 }),
 
+  // --- PEDALS vs FOOT PEGS (motor-gated) -----------------------------------
+  // Mid-drive motors mechanically require a crankset, so they auto-resolve to
+  // pedals (foot pegs are gated to hub motors). Purely ergonomic/mechanical —
+  // NO legal claim: every configuration is private-terrain only (see disclaimer).
+  c({ id: "pedals-standard", lineId: LINE_ID, category: "pedals", name: "Pedals",
+    description: "Standard crankset and pedals. Required for mid-drive motors.",
+    priceDeltaCents: 0, layerAsset: asset("pedals", "standard"), isDefault: true, sortOrder: 10 }),
+  c({ id: "foot-pegs", lineId: LINE_ID, category: "pedals", name: "Foot Pegs",
+    description: "Rear foot pegs instead of pedals. Hub-motor builds only. Private terrain use.",
+    priceDeltaCents: 5000, compatibleMotorTypes: ["hub"], layerAsset: asset("pedals", "foot-pegs"), isDefault: false, sortOrder: 20 }),
+
   // --- Q11 COLOUR + FINISH -------------------------------------------------
   c({ id: "colour-stealth", lineId: LINE_ID, category: "main_colour", name: "Stealth Black",
     priceDeltaCents: 0, swatch: "#1c1d22", layerAsset: asset("main_colour", "stealth"), isDefault: true, sortOrder: 10 }),
@@ -130,7 +145,10 @@ const components: Component[] = [
     priceDeltaCents: 6000, layerAsset: asset("finish_type", "gloss"), isDefault: false, sortOrder: 20 }),
 ];
 
-// --- EXTRAS (multi-select add-ons, available to any bike) ------------------
+// --- EXTRAS (optional multi-select accessories) ----------------------------
+// NOTE: the Street Legal Kit is intentionally NOT here — it is a SEPARATE
+// standalone product (/conversion-kit), never bundled with or cross-sold from
+// the off-road line. Foot pegs moved to the motor-gated `pedals` category.
 const extras: Extra[] = [
   { id: "extra-fenders", lineId: LINE_ID, name: "Fenders", description: "Front + rear mudguards.", priceDeltaCents: 6000, sortOrder: 10 },
   { id: "extra-lights", lineId: LINE_ID, name: "Lights", description: "Integrated front + rear lighting.", priceDeltaCents: 9000, sortOrder: 20 },
@@ -138,18 +156,6 @@ const extras: Extra[] = [
   { id: "extra-helmet", lineId: LINE_ID, name: "Helmet", description: "Matched off-road helmet.", priceDeltaCents: 12000, sortOrder: 40 },
   { id: "extra-maintenance-kit", lineId: LINE_ID, name: "Maintenance Kit", description: "Tools + spares for home servicing.", priceDeltaCents: 7000, sortOrder: 50 },
   { id: "extra-fairings", lineId: LINE_ID, name: "Custom Sport Fairings", description: "Bodywork fairings for a moto look.", priceDeltaCents: 35000, sortOrder: 60 },
-  { id: "extra-foot-pegs", lineId: LINE_ID, name: "Foot Pegs", description: "Rear foot pegs for a passenger / stunts. Private terrain use.", priceDeltaCents: 5000, sortOrder: 70 },
-  {
-    id: "extra-street-legal-kit",
-    lineId: LINE_ID,
-    name: "Street Legal Kit",
-    description:
-      "Pedal conversion plus documentation on limiting power and speed to make the bike road-legal in your region.",
-    priceDeltaCents: 45000,
-    enablesStreetLegal: true,
-    note: "Fitting this kit and following the included limiting instructions is what makes the bike road-legal. Without it, the build is for private terrain only.",
-    sortOrder: 80,
-  },
 ];
 
 export const offRoadCatalog: Catalog = {
@@ -169,21 +175,21 @@ export const offRoadCatalog: Catalog = {
       id: "preset-trailhead", lineId: LINE_ID, tier: 1, name: "Trailhead",
       tagline: "The honest entry point. Hardtail, hub-driven, ready for dirt.",
       heroAsset: "/assets/off-road/presets/trailhead.png", sortOrder: 10,
-      componentIds: ["chassis-hardtail", "wheel-275", "frame-m", "motor-hub-750", "battery-downtube-48", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "colour-stealth", "accent-black", "finish-matt"],
+      componentIds: ["chassis-hardtail", "wheel-275", "frame-m", "motor-hub-750", "battery-downtube-48", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"],
     },
     {
       id: "preset-ridgeline", lineId: LINE_ID, tier: 2, name: "Ridgeline",
       tagline: "Full-suspension mid-drive for all-day technical terrain.",
       heroAsset: "/assets/off-road/presets/ridgeline.png", sortOrder: 20,
-      componentIds: ["chassis-fullsus", "wheel-29", "frame-l", "motor-tsdz8", "battery-downtube-52", "brakes-hydraulic", "disc-200", "tyres-dualsport", "bar-riser", "seatpost-rigid", "colour-desert-tan", "accent-silver", "finish-matt"],
+      componentIds: ["chassis-fullsus", "wheel-29", "frame-l", "motor-tsdz8", "battery-downtube-48", "brakes-hydraulic", "disc-200", "tyres-dualsport", "bar-riser", "seatpost-rigid", "pedals-standard", "colour-desert-tan", "accent-silver", "finish-matt"],
       extraIds: ["extra-lights", "extra-fenders"],
     },
     {
       id: "preset-apex", lineId: LINE_ID, tier: 3, name: "Apex",
       tagline: "The full send. Mullet, TSDZ16, dual battery, no compromises.",
       heroAsset: "/assets/off-road/presets/apex.png", sortOrder: 30,
-      componentIds: ["chassis-fullsus", "wheel-mullet", "frame-l", "motor-tsdz16", "battery-dual-52", "brakes-hydraulic", "disc-220", "tyres-supermoto", "bar-riser", "seatpost-rigid", "colour-race-red", "accent-gold", "finish-gloss"],
-      extraIds: ["extra-fairings", "extra-lights", "extra-street-legal-kit"],
+      componentIds: ["chassis-fullsus", "wheel-mullet", "frame-l", "motor-tsdz16", "battery-dual-52", "brakes-hydraulic", "disc-220", "tyres-supermoto", "bar-riser", "seatpost-rigid", "pedals-standard", "colour-race-red", "accent-gold", "finish-gloss"],
+      extraIds: ["extra-fairings", "extra-lights"],
     },
   ],
 };

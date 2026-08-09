@@ -3,12 +3,26 @@
 Premium e-commerce experience for a custom **off-road electric bike** brand:
 a data-driven, compatibility-gated bike configurator with live pricing.
 
-> **Street-legal (updated by product decision):** the original brief kept the
-> street-legal kit fully separate. Per an explicit later decision, the **Street
-> Legal Kit is now an EXTRA add-on** (a pedal conversion + power/speed-limiting
-> documentation) that can be added to any build to make it road-legal. A build
-> without it is **private-terrain only** and carries a prominent no-liability
-> disclaimer, emphasised throughout the configurator. Pricing is in **EUR**.
+> **Street-legal:** the street-legal conversion kit is a **separate, standalone
+> product** ([/conversion-kit](src/app/conversion-kit/page.tsx)), framed on
+> EN 15194 / EPAC compliance. It is never bundled with, cross-sold on, or
+> presented as an upgrade from the off-road line. **Every** off-road
+> configuration — pedals or foot pegs — is **private-terrain only** and not
+> street legal, with a prominent no-liability disclaimer. Pricing is in **EUR**.
+>
+> _(History: an interim step made the kit a configurator extra; that was
+> explicitly reversed — it is standalone again.)_
+>
+> **Placeholders / open decisions** (all flagged in code, pending confirmation):
+> - **Prices** — placeholder EUR figures throughout.
+> - **Voltage tiers** — engineering-default: 48V universal; 52V only on the
+>   1500W hub + TSDZ16. Wrong-voltage battery↔motor is a hard safety gate.
+> - **Mullet wheels** — currently available on **both** frames; **open decision**
+>   (may need to be full-suspension-only).
+> - **Colour options** (5 main / 4 accent) and **frame sizes** (M/L/XL, no price
+>   delta) — placeholder sets.
+> - **Terms of Service** ([/terms](src/app/terms/page.tsx)) — placeholder copy,
+>   not approved legal language.
 
 ## Status — build increments 1–4 of 5 complete
 

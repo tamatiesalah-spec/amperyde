@@ -66,15 +66,27 @@ describe("frame-type gating (hardtail-only items)", () => {
   });
 });
 
-describe("no motor/battery voltage coupling", () => {
-  it("allows any battery with any motor", () => {
-    expect(checkCandidate(comp("battery-downtube-48"), { motor: "motor-tsdz16" }, ctx).ok).toBe(true);
-    expect(checkCandidate(comp("battery-downtube-52"), { motor: "motor-hub-750", chassis: "chassis-hardtail" }, ctx).ok).toBe(true);
+describe("motor/battery voltage compatibility (safety gate)", () => {
+  it("blocks a 52V battery on a 48V-only motor", () => {
+    expect(checkCandidate(comp("battery-downtube-52"), { chassis: "chassis-hardtail", motor: "motor-hub-750" }, ctx).ok).toBe(false);
+    expect(checkCandidate(comp("battery-downtube-52"), { motor: "motor-tsdz8" }, ctx).ok).toBe(false);
   });
 
-  it("does not auto-swap the battery when the motor changes", () => {
+  it("allows 48V on any motor and 52V on the high-power motors", () => {
+    expect(checkCandidate(comp("battery-downtube-48"), { motor: "motor-tsdz8" }, ctx).ok).toBe(true);
+    expect(checkCandidate(comp("battery-downtube-52"), { motor: "motor-tsdz16" }, ctx).ok).toBe(true);
+    expect(checkCandidate(comp("battery-downtube-52"), { chassis: "chassis-hardtail", motor: "motor-hub-1500" }, ctx).ok).toBe(true);
+  });
+
+  it("auto-resolves the battery when the motor no longer accepts its voltage", () => {
+    const start: Selection = { chassis: "chassis-hardtail", motor: "motor-hub-1500", battery: "battery-downtube-52" };
+    const { selection } = applyChange(start, "motor", "motor-hub-750", ctx); // now 48V-only
+    expect(selection.battery).toBe("battery-downtube-48");
+  });
+
+  it("keeps a still-valid battery when changing to another compatible motor", () => {
     const start: Selection = { chassis: "chassis-hardtail", motor: "motor-hub-750", battery: "battery-downtube-48" };
-    const { selection } = applyChange(start, "motor", "motor-hub-1500", ctx);
+    const { selection } = applyChange(start, "motor", "motor-hub-1000", ctx); // still 48V
     expect(selection.battery).toBe("battery-downtube-48");
   });
 });
@@ -129,6 +141,25 @@ describe("optionsForCategory", () => {
     const opts = optionsForCategory("motor", { chassis: "chassis-fullsus" }, ctx);
     expect(opts.find((o) => o.component.id === "motor-hub-750")?.result.ok).toBe(false);
     expect(opts.find((o) => o.component.id === "motor-tsdz8")?.result.ok).toBe(true);
+  });
+});
+
+describe("pedals / foot pegs (motor-gated)", () => {
+  it("blocks foot pegs on a mid-drive motor", () => {
+    expect(checkCandidate(comp("foot-pegs"), { motor: "motor-tsdz8" }, ctx).ok).toBe(false);
+  });
+  it("allows foot pegs on a hub motor", () => {
+    expect(checkCandidate(comp("foot-pegs"), { chassis: "chassis-hardtail", motor: "motor-hub-750" }, ctx).ok).toBe(true);
+  });
+  it("falls back to pedals when switching to a mid-drive motor", () => {
+    const start: Selection = { chassis: "chassis-hardtail", motor: "motor-hub-750", pedals: "foot-pegs" };
+    const { selection } = applyChange(start, "motor", "motor-tsdz16", ctx);
+    expect(selection.pedals).toBe("pedals-standard");
+  });
+  it("only offers pedals at the pedals step for a mid-drive build", () => {
+    const opts = optionsForCategory("pedals", { motor: "motor-tsdz8" }, ctx);
+    expect(opts.find((o) => o.component.id === "foot-pegs")?.result.ok).toBe(false);
+    expect(opts.find((o) => o.component.id === "pedals-standard")?.result.ok).toBe(true);
   });
 });
 

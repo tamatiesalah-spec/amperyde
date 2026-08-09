@@ -117,18 +117,31 @@ export function checkCandidate(
     reasons.push(frameReason(candidate, selectedChassis.frameType));
   }
 
-  // 2. Voltage matching (motor <-> battery).
+  // 1b. Motor-type gating (e.g. foot pegs need a hub motor; mid-drives need
+  //     pedals to function). Mirrors frame gating, keyed on the motor drive type.
+  const selectedMotor = others.find((c) => c.category === "motor");
+  if (candidate.category === "motor") {
+    for (const other of others) {
+      if (other.compatibleMotorTypes && candidate.motorType && !other.compatibleMotorTypes.includes(candidate.motorType)) {
+        reasons.push(motorTypeReason(other));
+      }
+    }
+  } else if (candidate.compatibleMotorTypes && selectedMotor?.motorType && !candidate.compatibleMotorTypes.includes(selectedMotor.motorType)) {
+    reasons.push(motorTypeReason(candidate));
+  }
+
+  // 2. Voltage compatibility — a battery's voltage must be one the selected
+  //    motor's controller accepts. Wrong voltage into a controller is a hardware
+  //    safety issue (overvoltage can destroy it), so this is a hard gate.
   if (candidate.category === "battery" && candidate.voltage != null) {
     const motor = others.find((c) => c.category === "motor");
-    if (motor?.voltage != null && motor.voltage !== candidate.voltage) {
-      reasons.push(`Requires a ${motor.voltage}V pack to match the motor.`);
+    if (motor?.acceptedVoltages && !motor.acceptedVoltages.includes(candidate.voltage)) {
+      reasons.push(`This motor accepts ${fmtVolts(motor.acceptedVoltages)}; a ${candidate.voltage}V battery won’t work.`);
     }
-  } else if (candidate.category === "motor" && candidate.voltage != null) {
+  } else if (candidate.category === "motor" && candidate.acceptedVoltages) {
     const battery = others.find((c) => c.category === "battery");
-    if (battery?.voltage != null && battery.voltage !== candidate.voltage) {
-      reasons.push(
-        `The ${battery.voltage}V pack doesn’t match this motor’s ${candidate.voltage}V.`,
-      );
+    if (battery?.voltage != null && !candidate.acceptedVoltages.includes(battery.voltage)) {
+      reasons.push(`This motor accepts ${fmtVolts(candidate.acceptedVoltages)}; the selected ${battery.voltage}V battery won’t work.`);
     }
   }
 
@@ -141,6 +154,18 @@ export function checkCandidate(
   }
 
   return reasons.length === 0 ? OK : { ok: false, reasons };
+}
+
+function fmtVolts(volts: number[]): string {
+  const list = [...volts].sort((a, b) => a - b).map((v) => `${v}V`);
+  return list.length <= 1 ? (list[0] ?? "") : `${list.slice(0, -1).join(", ")} or ${list[list.length - 1]}`;
+}
+
+function motorTypeReason(component: Component): string {
+  if (component.category === "pedals") {
+    return "Mid-drive motors require pedals; foot pegs are only available with a hub motor.";
+  }
+  return `${component.name} isn’t available with the selected motor.`;
 }
 
 function frameReason(component: Component, frame: FrameType): string {
@@ -203,8 +228,10 @@ export interface ChangeResult {
 }
 
 /**
- * Auto-select the battery whose voltage matches the selected motor. This is the
- * "voltage auto-resolves from motor selection" behaviour. Mutates `selection`.
+ * Auto-select a battery the selected motor's controller can safely accept (the
+ * "voltage auto-resolves from motor selection" behaviour). Picks the first
+ * fully-compatible battery — frame AND accepted voltage — preferring the default
+ * pack. Mutates `selection`.
  */
 function autoResolveBattery(
   selection: Selection,
@@ -213,15 +240,18 @@ function autoResolveBattery(
 ): void {
   const motorId = selection.motor;
   if (!motorId) return;
-  const voltage = ctx.byId.get(motorId)?.voltage;
-  if (voltage == null) return;
+  const accepted = ctx.byId.get(motorId)?.acceptedVoltages;
+  if (!accepted) return;
 
   const current = selection.battery ? ctx.byId.get(selection.battery) : undefined;
-  if (current && current.voltage === voltage) return; // already matches
+  // Already valid against the motor (voltage) and everything else (frame, etc.)?
+  if (current && checkCandidate(current, selection, ctx).ok) return;
 
-  const match = (ctx.byCategory.get("battery") ?? []).find(
-    (b) => b.voltage === voltage,
-  );
+  const batteries = ctx.byCategory.get("battery") ?? [];
+  const def = batteries.find((b) => b.isDefault);
+  const ordered = def ? [def, ...batteries.filter((b) => b !== def)] : batteries;
+  const match = ordered.find((b) => checkCandidate(b, selection, ctx).ok);
+
   if (match) {
     if (selection.battery !== match.id) {
       const from = selection.battery;
@@ -230,7 +260,7 @@ function autoResolveBattery(
         category: "battery",
         from,
         to: match.id,
-        reason: `Auto-matched to the motor’s ${voltage}V.`,
+        reason: `Auto-matched to a ${match.voltage}V pack the motor supports.`,
       });
     }
   } else if (selection.battery) {
@@ -240,7 +270,7 @@ function autoResolveBattery(
       category: "battery",
       from,
       to: undefined,
-      reason: `No ${voltage}V pack available for this motor.`,
+      reason: "No compatible battery for this motor.",
     });
   }
 }

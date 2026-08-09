@@ -52,7 +52,8 @@ create table components (
   frame_type             frame_type,               -- chassis only
   compatible_frame_types frame_type[],             -- non-chassis; null = all
   motor_type             motor_type,               -- motors only
-  voltage                integer,                  -- batteries (informational)
+  voltage                integer,                  -- batteries: nominal voltage
+  accepted_voltages      integer[],                -- motors: voltages accepted
   swatch                 text,                     -- colour categories
 
   layer_asset            text not null,
@@ -86,7 +87,6 @@ create table extras (
   price_delta_cents      integer not null default 0,
   compatible_frame_types frame_type[],
   note                   text,
-  enables_street_legal   boolean not null default false,
   sort_order             integer not null default 0
 );
 

@@ -79,10 +79,6 @@ export function Configurator({ catalog, initialComponentIds, initialExtraIds, pr
     [currentStep, selection, ctx],
   );
 
-  const streetLegal = useMemo(
-    () => catalog.extras.some((e) => e.enablesStreetLegal && extraIds.includes(e.id)),
-    [catalog.extras, extraIds],
-  );
   const frame = selectedFrameType(selection, ctx);
 
   if (!initialized) {
@@ -115,7 +111,7 @@ export function Configurator({ catalog, initialComponentIds, initialExtraIds, pr
         </Link>
       </header>
 
-      <DisclaimerBanner streetLegal={streetLegal} />
+      <DisclaimerBanner />
 
       <StepRail current={currentStep} selection={selection} extraCount={extraIds.length} ctx={ctx} onGoTo={goTo} />
 
@@ -183,25 +179,18 @@ export function Configurator({ catalog, initialComponentIds, initialExtraIds, pr
         </div>
       )}
 
-      <PriceBar price={price} validity={validity} streetLegal={streetLegal} />
+      <PriceBar price={price} validity={validity} />
     </div>
   );
 }
 
-function DisclaimerBanner({ streetLegal }: { streetLegal: boolean }) {
-  if (streetLegal) {
-    return (
-      <div className="border-b border-line bg-surface-2/60 px-6 py-2 text-xs text-muted">
-        <span className="font-semibold text-ink">Street Legal Kit added.</span> Road-legal once set up per
-        the included power/speed-limiting instructions for your region.
-      </div>
-    );
-  }
+function DisclaimerBanner() {
+  // Every off-road configuration — pedals or foot pegs — is private-terrain only.
+  // Road legality is out of scope for this line (see the separate conversion kit).
   return (
     <div className="border-b border-ember/40 bg-ember/10 px-6 py-2 text-xs text-ember">
-      <span className="font-semibold uppercase tracking-wide">Private terrain only.</span> This build is
-      not road-legal. Add the Street Legal Kit to ride on public roads — without it, AMPERYDE accepts no
-      liability for road use.
+      <span className="font-semibold uppercase tracking-wide">Private terrain only.</span> Off-road bikes
+      are not street legal in any configuration. AMPERYDE accepts no liability for use on public roads.
     </div>
   );
 }
@@ -348,12 +337,7 @@ function ExtrasPanel({
               ✓
             </span>
             <span className="min-w-0 flex-1">
-              <span className="flex items-center gap-2">
-                <span className="font-medium">{extra.name}</span>
-                {extra.enablesStreetLegal && (
-                  <span className="rounded-full border border-line px-1.5 py-0.5 text-[10px] text-muted">makes road-legal</span>
-                )}
-              </span>
+              <span className="font-medium">{extra.name}</span>
               {extra.description && <span className="mt-0.5 block text-sm text-muted">{extra.description}</span>}
               {extra.note && <span className="mt-1 block text-xs text-ember">{extra.note}</span>}
             </span>

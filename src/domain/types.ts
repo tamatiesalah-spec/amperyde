@@ -16,6 +16,7 @@ export type Category =
   | "tyres"
   | "handlebar"
   | "seatpost"
+  | "pedals"
   | "main_colour"
   | "accent_colour"
   | "finish_type";
@@ -32,6 +33,7 @@ export const CATEGORY_ORDER: readonly Category[] = [
   "tyres",
   "handlebar",
   "seatpost",
+  "pedals",
   "main_colour",
   "accent_colour",
   "finish_type",
@@ -48,6 +50,7 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   tyres: "Tyres",
   handlebar: "Handlebar",
   seatpost: "Seatpost",
+  pedals: "Pedals / Pegs",
   main_colour: "Main Colour",
   accent_colour: "Accent Colour",
   finish_type: "Finish",
@@ -75,11 +78,15 @@ export interface Component {
   frameType?: FrameType;
   /** NON-CHASSIS: frame types this component works with. `undefined` = all. */
   compatibleFrameTypes?: FrameType[];
+  /** Motor drive types this component works with (e.g. foot pegs need a hub). */
+  compatibleMotorTypes?: MotorType[];
 
   /** MOTOR ONLY: drive type. */
   motorType?: MotorType;
-  /** BATTERY: nominal voltage (informational / art only — no matching rule). */
+  /** BATTERY: nominal voltage. Must be one the selected motor accepts. */
   voltage?: number;
+  /** MOTOR ONLY: battery voltages this controller safely accepts. */
+  acceptedVoltages?: number[];
 
   /** A hex colour, for swatch categories (main/accent colour). */
   swatch?: string;
@@ -102,10 +109,8 @@ export interface Extra {
   priceDeltaCents: number;
   /** If set, only offered when the selected chassis frame matches. */
   compatibleFrameTypes?: FrameType[];
-  /** Emphasised note (e.g. legality / liability). */
+  /** Emphasised note (e.g. usage caveat). */
   note?: string;
-  /** When fitted, the build is road-legal (suppresses the private-terrain disclaimer). */
-  enablesStreetLegal?: boolean;
   sortOrder: number;
 }
 

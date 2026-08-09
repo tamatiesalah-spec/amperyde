@@ -36,6 +36,7 @@ export const FOCUS_REGIONS: Record<Category, Region> = {
   tyres: FRONT_WHEEL,
   handlebar: COCKPIT,
   seatpost: { x: 300, y: 150, w: 260, h: 260 },
+  pedals: { x: 330, y: 380, w: 260, h: 220 },
   main_colour: FULL,
   accent_colour: COCKPIT,
   finish_type: FULL,
@@ -51,6 +52,7 @@ export const LAYER_Z: Record<Category, number> = {
   battery: 30,
   motor: 40,
   brakes: 44,
+  pedals: 42,
   main_colour: 46,
   accent_colour: 47,
   finish_type: 48,
@@ -256,6 +258,18 @@ function mainColourLayer(comp: Component): string {
   ].join("");
 }
 
+function pedalsLayer(comp: Component): string {
+  if (comp.id.includes("foot-pegs")) {
+    // A rear foot peg near the rear axle.
+    return `<rect x="${REAR.cx + 44}" y="${REAR.cy - 5}" width="36" height="10" rx="4" fill="${C.hub}" stroke="${C.metal}" stroke-width="2"/>`;
+  }
+  // Crank arm + pedal at the bottom bracket.
+  return [
+    line(BB.x, BB.y, BB.x - 8, BB.y + 54, C.metal, 8),
+    `<rect x="${BB.x - 28}" y="${BB.y + 52}" width="36" height="11" rx="3" fill="${C.hub}"/>`,
+  ].join("");
+}
+
 const NONE = () => "";
 
 const PAINTERS: Record<Category, (c: Component) => string> = {
@@ -269,6 +283,7 @@ const PAINTERS: Record<Category, (c: Component) => string> = {
   tyres: tyresLayer,
   handlebar: handlebarLayer,
   seatpost: seatpostLayer,
+  pedals: pedalsLayer,
   main_colour: mainColourLayer,
   accent_colour: NONE,
   finish_type: NONE,
