@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/BrandLogo";
-import { ScrollScrubHero } from "@/components/hero/ScrollScrubHero";
+import { HeroVideoBackground } from "@/components/hero/HeroVideoBackground";
 import { Reveal } from "@/components/Reveal";
 
-// Landing. A cinematic canvas scroll-scrub hero (placeholder frames) over
-// scroll-triggered reveal sections. Per the non-negotiable, there is no
-// street-legal conversion content or cross-sell anywhere on this page.
+// Landing. TEMPORARY hero treatment: a looping background video behind the hero
+// text/CTA. The planned canvas scroll-scrub hero (ScrollScrubHero) is kept in
+// the codebase, dormant, until real turntable/render frames exist — swap it back
+// in here then. No street-legal content or cross-sell anywhere on this page.
 
 const PILLARS = [
   {
@@ -43,32 +44,38 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* Cinematic hero */}
-      <ScrollScrubHero heightVh={340}>
-        <p className="eyebrow">Custom off-road electric</p>
-        <h1 className="mt-4 max-w-4xl text-5xl font-semibold leading-[1.03] tracking-tight sm:text-7xl">
-          Built to your line.
-          <br />
-          <span className="text-brand">Engineered to order.</span>
-        </h1>
-        <p className="mx-auto mt-6 max-w-xl text-lg text-muted">
-          Every AMPERYDE off-road bike is configured, validated, and built for one rider.
-        </p>
-        <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/riders-choice"
-            className="rounded-full border border-line bg-surface/60 px-6 py-3 text-sm font-semibold text-ink backdrop-blur transition hover:border-muted"
-          >
-            Explore builds
-          </Link>
-          <Link
-            href="/configure"
-            className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-bright"
-          >
-            Design your own →
-          </Link>
+      {/* Hero — looping background video (temporary; see ScrollScrubHero note). */}
+      <section className="relative flex h-[92vh] min-h-[560px] flex-col items-center justify-center overflow-hidden px-6 text-center">
+        <HeroVideoBackground />
+        {/* Vignette for text legibility over the video. */}
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-bg/70 via-bg/25 to-bg" />
+
+        <div className="relative z-[2] flex flex-col items-center">
+          <p className="eyebrow">Custom off-road electric</p>
+          <h1 className="mt-4 max-w-4xl text-5xl font-semibold leading-[1.03] tracking-tight sm:text-7xl">
+            Built to your line.
+            <br />
+            <span className="text-brand">Engineered to order.</span>
+          </h1>
+          <p className="mx-auto mt-6 max-w-xl text-lg text-muted">
+            Every AMPERYDE off-road bike is configured, validated, and built for one rider.
+          </p>
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/riders-choice"
+              className="rounded-full border border-line bg-surface/60 px-6 py-3 text-sm font-semibold text-ink backdrop-blur transition hover:border-muted"
+            >
+              Explore builds
+            </Link>
+            <Link
+              href="/configure"
+              className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-bright"
+            >
+              Design your own →
+            </Link>
+          </div>
         </div>
-      </ScrollScrubHero>
+      </section>
 
       {/* Content below the hero */}
       <div className="relative z-10 bg-bg">
