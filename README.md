@@ -37,8 +37,9 @@ Following the brief's build order (data model → configurator → compositing/z
   scroll maps to frame index; scroll-triggered reveal sections below
 - ✅ **Checkout with server-side price re-validation** — `/checkout` re-validates the
   order (`validateOrder`) before any charge, mandatory T&C acceptance, pickup
-  selection, Stripe **test-keys-only** session creation. Standalone `/terms` and
-  `/conversion-kit` pages (both placeholder copy).
+  selection, Stripe **test-keys-only** session creation with **card + Klarna**
+  (pay later / instalments). Standalone `/terms`, `/conversion-kit`, and `/faq`
+  pages (policy/legal copy is placeholder).
 
 ### Hero (scroll-scrub)
 

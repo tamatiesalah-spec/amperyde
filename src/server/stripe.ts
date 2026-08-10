@@ -30,6 +30,11 @@ export async function createCheckoutSession(opts: {
   const stripe = new Stripe(key);
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
+    // Card plus Klarna (pay later / pay in instalments). Klarna supports EUR and
+    // the Netherlands; it must also be enabled on the Stripe account. Klarna
+    // needs a billing country, so collect the billing address.
+    payment_method_types: ["card", "klarna"],
+    billing_address_collection: "required",
     line_items: [
       {
         price_data: {

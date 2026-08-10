@@ -72,6 +72,11 @@ export function CheckoutForm({
         </p>
       )}
 
+      <p className="mt-4 flex items-center gap-2 text-xs text-muted">
+        <span className="rounded bg-[#ffb3c7] px-1.5 py-0.5 font-semibold text-black">Klarna</span>
+        Pay by card, or with Klarna — pay later or split into instalments — at the secure payment step.
+      </p>
+
       <button
         type="submit"
         disabled={!tos || pending}

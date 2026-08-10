@@ -145,7 +145,13 @@ export default function Home() {
         </section>
 
         <footer className="border-t border-line px-6 py-8 text-center text-xs text-faint">
-          AMPERYDE Off-Road · Custom electric bikes, built to order.
+          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            <Link href="/riders-choice" className="hover:text-muted">Rider&apos;s Choice</Link>
+            <Link href="/configure" className="hover:text-muted">Design Your Own</Link>
+            <Link href="/faq" className="hover:text-muted">FAQ</Link>
+            <Link href="/terms" className="hover:text-muted">Terms</Link>
+          </nav>
+          <p className="mt-4">AMPERYDE Off-Road · Custom electric bikes, built to order.</p>
         </footer>
       </div>
     </div>
