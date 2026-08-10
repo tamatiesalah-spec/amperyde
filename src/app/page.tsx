@@ -45,7 +45,8 @@ export default function Home() {
       </header>
 
       {/* Hero — looping background video (temporary; see ScrollScrubHero note). */}
-      <section className="relative flex h-[92vh] min-h-[560px] flex-col items-center justify-center overflow-hidden px-6 text-center">
+      {/* Shorter/wider on small screens so the landscape clip crops less; taller on desktop. */}
+      <section className="relative flex h-[72svh] min-h-[500px] flex-col items-center justify-center overflow-hidden px-6 text-center sm:h-[82vh] lg:h-[90vh]">
         <HeroVideoBackground />
         {/* Vignette for text legibility over the video. */}
         <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-bg/70 via-bg/25 to-bg" />

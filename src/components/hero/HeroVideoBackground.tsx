@@ -5,13 +5,13 @@
 // until real turntable/render frames exist.
 //
 // Behaviour:
-//  - autoplay + muted + loop + playsInline, no controls, object-cover
+//  - autoplay + muted + loop + playsInline, no controls, object-cover, centered
 //  - a poster still renders immediately underneath, so there's never a blank
 //    frame while the video loads
-//  - mobile (coarse pointer / small viewport) and reduced-motion users get the
-//    poster only — many mobile browsers block muted autoplay for data/battery,
-//    so we don't risk a frozen/broken player
-//  - if autoplay is rejected on desktop anyway, we drop back to the poster
+//  - we ATTEMPT autoplay on every device (muted + playsInline autoplay works on
+//    modern mobile) and fall back to the poster only if autoplay is actually
+//    rejected — detecting real failure rather than guessing by screen size
+//  - reduced-motion users get the poster only and the video is never loaded
 
 import { useEffect, useRef, useState } from "react";
 
@@ -21,16 +21,15 @@ export function HeroVideoBackground() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [useVideo, setUseVideo] = useState(false);
 
-  // Decide whether to even attempt video (client-only; SSR shows poster).
+  // Load the video unless the user prefers reduced motion. Not gated on screen
+  // size — mobile gets the video too, with the autoplay-failure fallback below.
   useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const mobile = window.matchMedia(
-      "(max-width: 767px), (hover: none) and (pointer: coarse)",
-    ).matches;
-    setUseVideo(!reduced && !mobile);
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setUseVideo(true);
+    }
   }, []);
 
-  // Force muted before play() (autoplay policies) and fall back on rejection.
+  // Force muted before play() (autoplay policy), fall back to poster on reject.
   useEffect(() => {
     if (!useVideo) return;
     const v = videoRef.current;
@@ -51,7 +50,7 @@ export function HeroVideoBackground() {
         alt=""
         aria-hidden
         fetchPriority="high"
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover object-center"
       />
       {useVideo && (
         <video
@@ -65,7 +64,7 @@ export function HeroVideoBackground() {
           aria-hidden
           tabIndex={-1}
           onError={() => setUseVideo(false)}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover object-center"
         >
           <source src="/video/hero-background.webm" type="video/webm" />
           <source src="/video/hero-background.mp4" type="video/mp4" />
