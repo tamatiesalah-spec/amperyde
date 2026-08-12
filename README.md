@@ -49,6 +49,12 @@ Following the brief's build order (data model → configurator → compositing/z
   selection, Stripe **test-keys-only** session creation with **card + Klarna**
   (pay later / instalments). Standalone `/terms`, `/conversion-kit`, and `/faq`
   pages (policy/legal copy is placeholder).
+- ✅ **Order lifecycle + dashboard (mock-first)** — a successful checkout persists an
+  order (`OrderRepository`, in-memory store seeded with demo orders — swap to
+  Supabase later) and sends a confirmation via a stub `EmailSender` (swap to
+  Resend/Postmark later). `/orders` staff dashboard + `/orders/[id]` detail with a
+  status timeline. (Payment is currently stubbed; when Stripe is wired, move order
+  creation to the payment-success webhook. `/orders` has no auth yet — internal view.)
 
 ### Hero (scroll-scrub)
 

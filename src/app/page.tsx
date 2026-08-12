@@ -150,6 +150,7 @@ export default function Home() {
             <Link href="/configure" className="hover:text-muted">Design Your Own</Link>
             <Link href="/faq" className="hover:text-muted">FAQ</Link>
             <Link href="/terms" className="hover:text-muted">Terms</Link>
+            <Link href="/orders" className="hover:text-muted">Orders</Link>
           </nav>
           <p className="mt-4">AMPERYDE Off-Road · Custom electric bikes, built to order.</p>
         </footer>

@@ -29,7 +29,18 @@ export function CheckoutForm({
       <input type="hidden" name="e" value={extraIds} />
       <input type="hidden" name="t" value={totalCents} />
 
-      <fieldset>
+      <label className="block">
+        <span className="text-sm font-semibold">Email for order updates</span>
+        <input
+          type="email"
+          name="email"
+          required
+          placeholder="you@example.com"
+          className="mt-2 w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-muted"
+        />
+      </label>
+
+      <fieldset className="mt-5">
         <legend className="text-sm font-semibold">Pickup location</legend>
         <p className="mt-0.5 text-xs text-faint">Collection only — no shipping. (Placeholder locations.)</p>
         <div className="mt-3 space-y-2">
