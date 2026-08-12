@@ -9,6 +9,7 @@ export type Category =
   | "chassis"
   | "wheel_size"
   | "frame_size"
+  | "fork"
   | "motor"
   | "battery"
   | "brakes"
@@ -26,6 +27,7 @@ export const CATEGORY_ORDER: readonly Category[] = [
   "chassis",
   "wheel_size",
   "frame_size",
+  "fork",
   "motor",
   "battery",
   "brakes",
@@ -43,6 +45,7 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   chassis: "Chassis",
   wheel_size: "Wheel Size",
   frame_size: "Frame Size",
+  fork: "Suspension Fork",
   motor: "Motor",
   battery: "Battery",
   brakes: "Brakes",

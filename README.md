@@ -17,10 +17,13 @@ a data-driven, compatibility-gated bike configurator with live pricing.
 > - **Prices** — placeholder EUR figures throughout.
 > - **Voltage tiers** — engineering-default: 48V universal; 52V only on the
 >   1500W hub + TSDZ16. Wrong-voltage battery↔motor is a hard safety gate.
-> - **Mullet wheels** — currently available on **both** frames; **open decision**
->   (may need to be full-suspension-only).
+> - **Suspension fork** — placeholder options (100mm Coil / 130mm Air / 160mm
+>   Air) and prices; fork-travel↔frame pairing is available on both frames for
+>   now (open, like mullet was).
 > - **Colour options** (5 main / 4 accent) and **frame sizes** (M/L/XL, no price
 >   delta) — placeholder sets.
+>
+> **Confirmed:** mullet wheels stay available on **both** frames (decided).
 > - **Terms of Service** ([/terms](src/app/terms/page.tsx)) — placeholder copy,
 >   not approved legal language.
 

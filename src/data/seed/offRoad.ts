@@ -40,6 +40,19 @@ const components: Component[] = [
   c({ id: "frame-xl", lineId: LINE_ID, category: "frame_size", name: "XL",
     description: "Rider height ~186–196 cm.", priceDeltaCents: 0, layerAsset: asset("frame_size", "xl"), isDefault: false, sortOrder: 30 }),
 
+  // --- SUSPENSION FORK -----------------------------------------------------
+  // PLACEHOLDER prices/travel pending real sourcing. Available on both frames
+  // for now (fork travel vs frame pairing is an OPEN decision, like mullet).
+  c({ id: "fork-coil-100", lineId: LINE_ID, category: "fork", name: "100mm Coil",
+    description: "Coil-sprung fork, 100mm travel. Simple, reliable, low-maintenance.",
+    priceDeltaCents: 0, layerAsset: asset("fork", "coil-100"), isDefault: true, sortOrder: 10 }),
+  c({ id: "fork-air-130", lineId: LINE_ID, category: "fork", name: "130mm Air",
+    description: "Air-sprung fork, 130mm travel, adjustable rebound.",
+    priceDeltaCents: 22000, layerAsset: asset("fork", "air-130"), isDefault: false, sortOrder: 20 }),
+  c({ id: "fork-air-160", lineId: LINE_ID, category: "fork", name: "160mm Air",
+    description: "Air-sprung fork, 160mm travel, high-end damping for big hits.",
+    priceDeltaCents: 40000, layerAsset: asset("fork", "air-160"), isDefault: false, sortOrder: 30 }),
+
   // --- Q4 MOTOR (hub motors are hardtail-only) -----------------------------
   // acceptedVoltages is an ENGINEERING-DEFAULT PLACEHOLDER pending real spec
   // confirmation: 48V is the universal tier; 52V is gated to the higher-power
@@ -175,20 +188,20 @@ export const offRoadCatalog: Catalog = {
       id: "preset-trailhead", lineId: LINE_ID, tier: 1, name: "Trailhead",
       tagline: "The honest entry point. Hardtail, hub-driven, ready for dirt.",
       heroAsset: "/assets/off-road/presets/trailhead.png", sortOrder: 10,
-      componentIds: ["chassis-hardtail", "wheel-275", "frame-m", "motor-hub-750", "battery-downtube-48", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"],
+      componentIds: ["chassis-hardtail", "wheel-275", "frame-m", "fork-coil-100", "motor-hub-750", "battery-downtube-48", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"],
     },
     {
       id: "preset-ridgeline", lineId: LINE_ID, tier: 2, name: "Ridgeline",
       tagline: "Full-suspension mid-drive for all-day technical terrain.",
       heroAsset: "/assets/off-road/presets/ridgeline.png", sortOrder: 20,
-      componentIds: ["chassis-fullsus", "wheel-29", "frame-l", "motor-tsdz8", "battery-downtube-48", "brakes-hydraulic", "disc-200", "tyres-dualsport", "bar-riser", "seatpost-rigid", "pedals-standard", "colour-desert-tan", "accent-silver", "finish-matt"],
+      componentIds: ["chassis-fullsus", "wheel-29", "frame-l", "fork-air-130", "motor-tsdz8", "battery-downtube-48", "brakes-hydraulic", "disc-200", "tyres-dualsport", "bar-riser", "seatpost-rigid", "pedals-standard", "colour-desert-tan", "accent-silver", "finish-matt"],
       extraIds: ["extra-lights", "extra-fenders"],
     },
     {
       id: "preset-apex", lineId: LINE_ID, tier: 3, name: "Apex",
       tagline: "The full send. Mullet, TSDZ16, dual battery, no compromises.",
       heroAsset: "/assets/off-road/presets/apex.png", sortOrder: 30,
-      componentIds: ["chassis-fullsus", "wheel-mullet", "frame-l", "motor-tsdz16", "battery-dual-52", "brakes-hydraulic", "disc-220", "tyres-supermoto", "bar-riser", "seatpost-rigid", "pedals-standard", "colour-race-red", "accent-gold", "finish-gloss"],
+      componentIds: ["chassis-fullsus", "wheel-mullet", "frame-l", "fork-air-160", "motor-tsdz16", "battery-dual-52", "brakes-hydraulic", "disc-220", "tyres-supermoto", "bar-riser", "seatpost-rigid", "pedals-standard", "colour-race-red", "accent-gold", "finish-gloss"],
       extraIds: ["extra-fairings", "extra-lights"],
     },
   ],

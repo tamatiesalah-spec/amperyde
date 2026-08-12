@@ -10,6 +10,7 @@ create type component_category as enum (
   'chassis',
   'wheel_size',
   'frame_size',
+  'fork',
   'motor',
   'battery',
   'brakes',

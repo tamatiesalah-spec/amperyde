@@ -15,6 +15,9 @@ insert into components (id, line_id, category, name, description, price_delta_ce
 insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, accepted_voltages, swatch, layer_asset, closeup_asset, is_default, sort_order) values ('frame-m', 'line-off-road', 'frame_size', 'M', 'Rider height ~165–177 cm.', 0, null, null, null, null, null, null, '/assets/off-road/frame_size/m.svg', null, true, 10);
 insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, accepted_voltages, swatch, layer_asset, closeup_asset, is_default, sort_order) values ('frame-l', 'line-off-road', 'frame_size', 'L', 'Rider height ~177–186 cm.', 0, null, null, null, null, null, null, '/assets/off-road/frame_size/l.svg', null, false, 20);
 insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, accepted_voltages, swatch, layer_asset, closeup_asset, is_default, sort_order) values ('frame-xl', 'line-off-road', 'frame_size', 'XL', 'Rider height ~186–196 cm.', 0, null, null, null, null, null, null, '/assets/off-road/frame_size/xl.svg', null, false, 30);
+insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, accepted_voltages, swatch, layer_asset, closeup_asset, is_default, sort_order) values ('fork-coil-100', 'line-off-road', 'fork', '100mm Coil', 'Coil-sprung fork, 100mm travel. Simple, reliable, low-maintenance.', 0, null, null, null, null, null, null, '/assets/off-road/fork/coil-100.svg', null, true, 10);
+insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, accepted_voltages, swatch, layer_asset, closeup_asset, is_default, sort_order) values ('fork-air-130', 'line-off-road', 'fork', '130mm Air', 'Air-sprung fork, 130mm travel, adjustable rebound.', 22000, null, null, null, null, null, null, '/assets/off-road/fork/air-130.svg', null, false, 20);
+insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, accepted_voltages, swatch, layer_asset, closeup_asset, is_default, sort_order) values ('fork-air-160', 'line-off-road', 'fork', '160mm Air', 'Air-sprung fork, 160mm travel, high-end damping for big hits.', 40000, null, null, null, null, null, null, '/assets/off-road/fork/air-160.svg', null, false, 30);
 insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, accepted_voltages, swatch, layer_asset, closeup_asset, is_default, sort_order) values ('motor-hub-750', 'line-off-road', 'motor', '750W Hub Motor', 'Quiet, low-maintenance rear hub drive.', 0, null, '{hardtail}', 'hub', null, '{48}', null, '/assets/off-road/motor/hub-750.svg', null, true, 10);
 insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, accepted_voltages, swatch, layer_asset, closeup_asset, is_default, sort_order) values ('motor-hub-1000', 'line-off-road', 'motor', '1000W Hub Motor', 'More punch, still hub-simple.', 15000, null, '{hardtail}', 'hub', null, '{48}', null, '/assets/off-road/motor/hub-1000.svg', null, false, 20);
 insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, accepted_voltages, swatch, layer_asset, closeup_asset, is_default, sort_order) values ('motor-hub-1500', 'line-off-road', 'motor', '1500W Hub Motor', 'Maximum hub power.', 30000, null, '{hardtail}', 'hub', null, '{48,52}', null, '/assets/off-road/motor/hub-1500.svg', null, false, 30);
@@ -66,6 +69,7 @@ insert into presets (id, line_id, tier, name, tagline, hero_asset, sort_order) v
 insert into preset_components (preset_id, component_id) values ('preset-trailhead', 'chassis-hardtail');
 insert into preset_components (preset_id, component_id) values ('preset-trailhead', 'wheel-275');
 insert into preset_components (preset_id, component_id) values ('preset-trailhead', 'frame-m');
+insert into preset_components (preset_id, component_id) values ('preset-trailhead', 'fork-coil-100');
 insert into preset_components (preset_id, component_id) values ('preset-trailhead', 'motor-hub-750');
 insert into preset_components (preset_id, component_id) values ('preset-trailhead', 'battery-downtube-48');
 insert into preset_components (preset_id, component_id) values ('preset-trailhead', 'brakes-mechanical');
@@ -82,6 +86,7 @@ insert into presets (id, line_id, tier, name, tagline, hero_asset, sort_order) v
 insert into preset_components (preset_id, component_id) values ('preset-ridgeline', 'chassis-fullsus');
 insert into preset_components (preset_id, component_id) values ('preset-ridgeline', 'wheel-29');
 insert into preset_components (preset_id, component_id) values ('preset-ridgeline', 'frame-l');
+insert into preset_components (preset_id, component_id) values ('preset-ridgeline', 'fork-air-130');
 insert into preset_components (preset_id, component_id) values ('preset-ridgeline', 'motor-tsdz8');
 insert into preset_components (preset_id, component_id) values ('preset-ridgeline', 'battery-downtube-48');
 insert into preset_components (preset_id, component_id) values ('preset-ridgeline', 'brakes-hydraulic');
@@ -100,6 +105,7 @@ insert into presets (id, line_id, tier, name, tagline, hero_asset, sort_order) v
 insert into preset_components (preset_id, component_id) values ('preset-apex', 'chassis-fullsus');
 insert into preset_components (preset_id, component_id) values ('preset-apex', 'wheel-mullet');
 insert into preset_components (preset_id, component_id) values ('preset-apex', 'frame-l');
+insert into preset_components (preset_id, component_id) values ('preset-apex', 'fork-air-160');
 insert into preset_components (preset_id, component_id) values ('preset-apex', 'motor-tsdz16');
 insert into preset_components (preset_id, component_id) values ('preset-apex', 'battery-dual-52');
 insert into preset_components (preset_id, component_id) values ('preset-apex', 'brakes-hydraulic');

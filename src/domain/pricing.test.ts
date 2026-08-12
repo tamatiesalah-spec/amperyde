@@ -44,8 +44,8 @@ describe("priceSelection", () => {
   it("prices the Apex preset (components + preset extras) as expected", () => {
     const sel = selectionFromComponentIds(offRoadCatalog.presets[2].componentIds, ctx);
     const p = priceSelection(line, sel, ctx, extrasCtx(offRoadCatalog.presets[2].extraIds ?? []));
-    // components 499000 + extras (fairings 35000 + lights 9000)
-    expect(p.totalCents).toBe(499000 + 44000);
+    // components 539000 (incl. fork-air-160 +40000) + extras (fairings 35000 + lights 9000)
+    expect(p.totalCents).toBe(539000 + 44000);
   });
 });
 

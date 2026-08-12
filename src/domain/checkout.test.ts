@@ -42,7 +42,7 @@ describe("valid order", () => {
     expect(r.errors).toEqual([]);
     expect(r.totalCents).toBe(correct);
     expect(r.extraIds).toEqual(APEX_EXTRAS);
-    expect(Object.keys(r.selection ?? {})).toHaveLength(14);
+    expect(Object.keys(r.selection ?? {})).toHaveLength(15);
   });
 
   it("returns the server-computed total, never trusting the client number", () => {
@@ -72,7 +72,7 @@ describe("tamper: price mismatch", () => {
 
 describe("tamper: invalid combinations", () => {
   it("rejects a hub motor on a full-suspension chassis", () => {
-    const ids = ["chassis-fullsus", "wheel-29", "frame-m", "motor-hub-750", "battery-downtube-48", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"];
+    const ids = ["chassis-fullsus", "wheel-29", "frame-m", "fork-coil-100", "motor-hub-750", "battery-downtube-48", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"];
     const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: totalFor(ids) }, catalog);
     expect(r.ok).toBe(false);
     expect(codes(r)).not.toContain("price_mismatch");
@@ -80,14 +80,14 @@ describe("tamper: invalid combinations", () => {
   });
 
   it("rejects a 52V battery on a 48V-only motor (voltage safety gate)", () => {
-    const ids = ["chassis-hardtail", "wheel-29", "frame-m", "motor-hub-750", "battery-downtube-52", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"];
+    const ids = ["chassis-hardtail", "wheel-29", "frame-m", "fork-coil-100", "motor-hub-750", "battery-downtube-52", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"];
     const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: totalFor(ids) }, catalog);
     expect(r.ok).toBe(false);
     expect(incompatReasons(r).some((x) => /accepts|V/i.test(x))).toBe(true);
   });
 
   it("rejects a triangle battery on a full-suspension chassis", () => {
-    const ids = ["chassis-fullsus", "wheel-29", "frame-m", "motor-tsdz8", "battery-triangle-52", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"];
+    const ids = ["chassis-fullsus", "wheel-29", "frame-m", "fork-coil-100", "motor-tsdz8", "battery-triangle-52", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"];
     const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: totalFor(ids) }, catalog);
     expect(r.ok).toBe(false);
     expect(codes(r)).toContain("incompatible");
@@ -144,7 +144,7 @@ describe("tamper: bad extras", () => {
   });
 
   it("rejects foot pegs on a mid-drive motor (mid-drive requires pedals)", () => {
-    const ids = ["chassis-fullsus", "wheel-29", "frame-m", "motor-tsdz8", "battery-downtube-48", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "foot-pegs", "colour-stealth", "accent-black", "finish-matt"];
+    const ids = ["chassis-fullsus", "wheel-29", "frame-m", "fork-coil-100", "motor-tsdz8", "battery-downtube-48", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "foot-pegs", "colour-stealth", "accent-black", "finish-matt"];
     const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: totalFor(ids) }, catalog);
     expect(r.ok).toBe(false);
     expect(incompatReasons(r).some((x) => /pedals|hub/i.test(x))).toBe(true);

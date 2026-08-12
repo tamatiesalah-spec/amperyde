@@ -29,6 +29,7 @@ export const FOCUS_REGIONS: Record<Category, Region> = {
   chassis: FULL,
   wheel_size: FRONT_WHEEL,
   frame_size: FULL,
+  fork: { x: 620, y: 205, w: 250, h: 290 },
   motor: { x: 200, y: 330, w: 380, h: 270 },
   battery: { x: 360, y: 240, w: 300, h: 260 },
   brakes: { x: 590, y: 320, w: 300, h: 300 },
@@ -47,6 +48,7 @@ export const LAYER_Z: Record<Category, number> = {
   wheel_size: 10,
   tyres: 12,
   chassis: 20,
+  fork: 22,
   seatpost: 22,
   brake_disc: 24,
   battery: 30,
@@ -270,12 +272,41 @@ function pedalsLayer(comp: Component): string {
   ].join("");
 }
 
+function forkLayer(comp: Component): string {
+  const air = comp.id.includes("air");
+  const long = comp.id.includes("160");
+  const mid = comp.id.includes("130");
+  const crownX = 700, crownY = 250;
+  const axleX = FRONT.cx, axleY = FRONT.cy;
+  // More travel => longer lowers (the stanchion/lower junction sits higher).
+  const frac = long ? 0.34 : mid ? 0.44 : 0.52;
+  const jx = crownX + (axleX - crownX) * frac;
+  const jy = crownY + (axleY - crownY) * frac;
+  const parts: string[] = [
+    line(crownX, crownY, jx, jy, air ? "#c9ced6" : C.metal, 9), // stanchion
+    line(jx, jy, axleX, axleY, "#1b1c22", 14), // lower leg
+    `<rect x="${crownX - 10}" y="${crownY - 8}" width="22" height="16" rx="4" fill="${C.hub}" stroke="${C.metal}" stroke-width="2"/>`,
+  ];
+  if (air) {
+    parts.push(circle(crownX + 1, crownY - 10, 5, `fill="${C.brand}"`)); // air cap accent
+  } else {
+    for (let i = 1; i <= 4; i++) {
+      const t = i / 5;
+      const sx = crownX + (jx - crownX) * t;
+      const sy = crownY + (jy - crownY) * t;
+      parts.push(line(sx - 5, sy - 2, sx + 5, sy + 2, "#8b8f98", 2)); // coil ticks
+    }
+  }
+  return parts.join("");
+}
+
 const NONE = () => "";
 
 const PAINTERS: Record<Category, (c: Component) => string> = {
   chassis: chassisLayer,
   wheel_size: wheelSizeLayer,
   frame_size: NONE,
+  fork: forkLayer,
   motor: motorLayer,
   battery: batteryLayer,
   brakes: brakesLayer,
