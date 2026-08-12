@@ -23,6 +23,12 @@ a data-driven, compatibility-gated bike configurator with live pricing.
 > - **Colour options** (5 main / 4 accent) and **frame sizes** (M/L/XL, no price
 >   delta) — placeholder sets.
 >
+> **Coming soon (not yet purchasable):** the **full-suspension chassis** is flagged
+> `comingSoon` — shown disabled in the configurator with a badge, rejected by
+> checkout re-validation, and the two full-suspension presets (Ridgeline, Apex)
+> are marked "coming soon" on Rider's Choice. Flip `comingSoon` off to launch it.
+> (Trailhead is the only immediately-buyable preset for now.)
+>
 > **Confirmed:** mullet wheels stay available on **both** frames (decided).
 > - **Terms of Service** ([/terms](src/app/terms/page.tsx)) — placeholder copy,
 >   not approved legal language.

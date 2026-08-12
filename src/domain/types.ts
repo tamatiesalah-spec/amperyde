@@ -101,6 +101,11 @@ export interface Component {
 
   isDefault: boolean;
   sortOrder: number;
+
+  /** Visible but not yet purchasable — shown disabled with a "coming soon" badge
+   *  and rejected by checkout re-validation. Kept in the data model so it can be
+   *  switched on later without a rebuild. */
+  comingSoon?: boolean;
 }
 
 /** Optional multi-select add-on, priced on top of the build. */

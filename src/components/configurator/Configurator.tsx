@@ -20,7 +20,7 @@ import {
   type AnnotatedOption,
   type CompatContext,
 } from "@/domain/compatibility";
-import { defaultSelection } from "@/domain/configurator";
+import { defaultSelection, withAvailableComponents } from "@/domain/configurator";
 import { formatMoney, priceSelection } from "@/domain/pricing";
 import { useConfiguratorStore, type Step } from "@/state/configuratorStore";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -56,10 +56,12 @@ export function Configurator({ catalog, initialComponentIds, initialExtraIds, pr
 
   const initKey = `${catalog.line.id}:${initialComponentIds?.join(",") ?? "default"}:${initialExtraIds?.join(",") ?? ""}`;
   useEffect(() => {
-    const base = initialComponentIds
+    const seeded = initialComponentIds
       ? selectionFromComponentIds(initialComponentIds, ctx)
       : defaultSelection(ctx);
-    initialize(base, initialExtraIds ?? [], ctx);
+    // Never seed onto a coming-soon part (e.g. a full-suspension preset opened
+    // directly) — fall back to the available default for that category.
+    initialize(withAvailableComponents(seeded, ctx), initialExtraIds ?? [], ctx);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initKey]);
 
@@ -253,7 +255,8 @@ function OptionCard({
   onSelect: () => void;
 }) {
   const { component, result, isSelected } = option;
-  const disabled = !result.ok && !isSelected;
+  const comingSoon = !!component.comingSoon;
+  const disabled = comingSoon || (!result.ok && !isSelected);
 
   return (
     <button
@@ -286,13 +289,24 @@ function OptionCard({
           {isSelected && (
             <span className="rounded-full bg-brand px-1.5 py-0.5 text-[10px] font-semibold text-white">Selected</span>
           )}
+          {comingSoon && (
+            <span className="rounded-full border border-steel/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-steel">
+              Coming soon
+            </span>
+          )}
         </span>
         {component.description && <span className="mt-0.5 block truncate text-sm text-muted">{component.description}</span>}
-        {disabled && result.reasons[0] && <span className="mt-1 block text-xs text-ember">{result.reasons[0]}</span>}
+        {comingSoon ? (
+          <span className="mt-1 block text-xs text-faint">Not yet available for purchase.</span>
+        ) : (
+          disabled && result.reasons[0] && <span className="mt-1 block text-xs text-ember">{result.reasons[0]}</span>
+        )}
       </span>
 
       <span className="shrink-0 text-right font-mono text-sm">
-        {component.priceDeltaCents === 0 ? (
+        {comingSoon ? (
+          <span className="text-faint">—</span>
+        ) : component.priceDeltaCents === 0 ? (
           <span className="text-faint">Included</span>
         ) : (
           <span className="text-ink">+{formatMoney(component.priceDeltaCents, currency)}</span>

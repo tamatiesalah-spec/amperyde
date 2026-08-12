@@ -30,6 +30,7 @@ export interface OrderRequest {
 export type OrderError =
   | { code: "unknown_line"; lineSlug: string }
   | { code: "unknown_component"; componentId: string }
+  | { code: "unavailable_component"; componentId: string }
   | { code: "foreign_line_component"; componentId: string }
   | { code: "duplicate_category"; category: Category; componentIds: string[] }
   | { code: "incomplete_build"; missing: Category[] }
@@ -68,6 +69,11 @@ export function validateOrder(request: OrderRequest, catalog: Catalog): OrderVal
     }
     if (comp.lineId !== catalog.line.id) {
       errors.push({ code: "foreign_line_component", componentId: id });
+      continue;
+    }
+    if (comp.comingSoon) {
+      // Visible in the configurator but not yet purchasable.
+      errors.push({ code: "unavailable_component", componentId: id });
       continue;
     }
     const list = idsByCategory.get(comp.category) ?? [];

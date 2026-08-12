@@ -18,16 +18,18 @@ const totalFor = (ids: string[], extraIds: string[] = []) =>
     selectedIds: extraIds,
   }).totalCents;
 
-const APEX = preset("Apex");
-const APEX_IDS = APEX.componentIds;
-const APEX_EXTRAS = APEX.extraIds ?? [];
-const TRAIL = preset("Trailhead").componentIds;
-const correct = totalFor(APEX_IDS, APEX_EXTRAS);
+// The Trailhead build is hardtail — every part is currently purchasable, so it's
+// the "valid" baseline. Apex is full-suspension (comingSoon) and used to test the
+// unavailable-component gate.
+const IDS = preset("Trailhead").componentIds;
+const EXTRAS = ["extra-lights", "extra-fenders"];
+const correct = totalFor(IDS, EXTRAS);
+const APEX_IDS = preset("Apex").componentIds;
 
 const order = (over: Partial<OrderRequest> = {}): OrderRequest => ({
   lineSlug: "off-road",
-  componentIds: APEX_IDS,
-  extraIds: APEX_EXTRAS,
+  componentIds: IDS,
+  extraIds: EXTRAS,
   expectedTotalCents: correct,
   ...over,
 });
@@ -41,13 +43,12 @@ describe("valid order", () => {
     expect(r.ok).toBe(true);
     expect(r.errors).toEqual([]);
     expect(r.totalCents).toBe(correct);
-    expect(r.extraIds).toEqual(APEX_EXTRAS);
+    expect(r.extraIds).toEqual(EXTRAS);
     expect(Object.keys(r.selection ?? {})).toHaveLength(15);
   });
 
   it("returns the server-computed total, never trusting the client number", () => {
-    const r = validateOrder(order(), catalog);
-    expect(r.totalCents).toBe(totalFor(APEX_IDS, APEX_EXTRAS));
+    expect(validateOrder(order(), catalog).totalCents).toBe(totalFor(IDS, EXTRAS));
   });
 });
 
@@ -70,15 +71,7 @@ describe("tamper: price mismatch", () => {
   });
 });
 
-describe("tamper: invalid combinations", () => {
-  it("rejects a hub motor on a full-suspension chassis", () => {
-    const ids = ["chassis-fullsus", "wheel-29", "frame-m", "fork-coil-100", "motor-hub-750", "battery-downtube-48", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"];
-    const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: totalFor(ids) }, catalog);
-    expect(r.ok).toBe(false);
-    expect(codes(r)).not.toContain("price_mismatch");
-    expect(incompatReasons(r).some((x) => /hardtail/i.test(x))).toBe(true);
-  });
-
+describe("tamper: invalid combinations (reachable on hardtail)", () => {
   it("rejects a 52V battery on a 48V-only motor (voltage safety gate)", () => {
     const ids = ["chassis-hardtail", "wheel-29", "frame-m", "fork-coil-100", "motor-hub-750", "battery-downtube-52", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"];
     const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: totalFor(ids) }, catalog);
@@ -86,17 +79,25 @@ describe("tamper: invalid combinations", () => {
     expect(incompatReasons(r).some((x) => /accepts|V/i.test(x))).toBe(true);
   });
 
-  it("rejects a triangle battery on a full-suspension chassis", () => {
-    const ids = ["chassis-fullsus", "wheel-29", "frame-m", "fork-coil-100", "motor-tsdz8", "battery-triangle-52", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "pedals-standard", "colour-stealth", "accent-black", "finish-matt"];
+  it("rejects foot pegs on a mid-drive motor (mid-drive requires pedals)", () => {
+    const ids = ["chassis-hardtail", "wheel-29", "frame-m", "fork-coil-100", "motor-tsdz8", "battery-downtube-48", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "foot-pegs", "colour-stealth", "accent-black", "finish-matt"];
     const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: totalFor(ids) }, catalog);
     expect(r.ok).toBe(false);
-    expect(codes(r)).toContain("incompatible");
+    expect(incompatReasons(r).some((x) => /pedals|hub/i.test(x))).toBe(true);
+  });
+});
+
+describe("availability gate", () => {
+  it("rejects a build containing a coming-soon component (full-suspension chassis)", () => {
+    const r = validateOrder({ lineSlug: "off-road", componentIds: APEX_IDS, extraIds: preset("Apex").extraIds, expectedTotalCents: totalFor(APEX_IDS) }, catalog);
+    expect(r.ok).toBe(false);
+    expect(r.errors.find((e) => e.code === "unavailable_component")).toMatchObject({ componentId: "chassis-fullsus" });
   });
 });
 
 describe("tamper: bad component ids", () => {
   it("rejects an unknown component id", () => {
-    const ids = [...TRAIL.slice(0, 12), "totally-bogus"];
+    const ids = [...IDS.slice(0, 14), "totally-bogus"];
     const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: totalFor(ids) }, catalog);
     expect(r.errors.find((e) => e.code === "unknown_component")).toMatchObject({ componentId: "totally-bogus" });
   });
@@ -104,19 +105,19 @@ describe("tamper: bad component ids", () => {
   it("rejects a component from another product line", () => {
     const foreign = { ...catalog.components[0], id: "foreign-part", lineId: "line-other", category: "finish_type" as const };
     const tampered: Catalog = { ...catalog, components: [...catalog.components, foreign] };
-    const ids = [...TRAIL.slice(0, 12), "foreign-part"];
+    const ids = [...IDS.slice(0, 14), "foreign-part"];
     const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: 0 }, tampered);
     expect(r.errors.find((e) => e.code === "foreign_line_component")).toMatchObject({ componentId: "foreign-part" });
   });
 
   it("rejects two components in the same category", () => {
-    const ids = [...TRAIL, "chassis-fullsus"];
-    const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: totalFor(ids) }, catalog);
-    expect(r.errors.find((e) => e.code === "duplicate_category")).toMatchObject({ category: "chassis" });
+    const dup = [...IDS, "wheel-29"]; // Trailhead already has wheel-275
+    const r = validateOrder({ lineSlug: "off-road", componentIds: dup, expectedTotalCents: totalFor(dup) }, catalog);
+    expect(r.errors.find((e) => e.code === "duplicate_category")).toMatchObject({ category: "wheel_size" });
   });
 
   it("rejects an incomplete build and reports the missing category", () => {
-    const ids = TRAIL.filter((id) => id !== "finish-matt");
+    const ids = IDS.filter((id) => id !== "finish-matt");
     const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: totalFor(ids) }, catalog);
     expect(r.errors.find((e) => e.code === "incomplete_build")).toMatchObject({ missing: ["finish_type"] });
   });
@@ -124,7 +125,7 @@ describe("tamper: bad component ids", () => {
 
 describe("tamper: bad extras", () => {
   it("rejects an unknown extra id", () => {
-    const r = validateOrder(order({ extraIds: [...APEX_EXTRAS, "extra-bogus"] }), catalog);
+    const r = validateOrder(order({ extraIds: [...EXTRAS, "extra-bogus"] }), catalog);
     expect(r.errors.find((e) => e.code === "unknown_extra")).toMatchObject({ extraId: "extra-bogus" });
   });
 
@@ -136,18 +137,11 @@ describe("tamper: bad extras", () => {
   });
 
   it("rejects a frame-incompatible extra", () => {
-    const htOnly = { ...catalog.extras[0], id: "extra-ht-only", compatibleFrameTypes: ["hardtail" as const] };
-    const tampered: Catalog = { ...catalog, extras: [...catalog.extras, htOnly] };
-    // Apex is full-suspension, so a hardtail-only extra must be rejected.
-    const r = validateOrder(order({ extraIds: ["extra-ht-only"], expectedTotalCents: correct }), tampered);
-    expect(r.errors.find((e) => e.code === "extra_frame_incompatible")).toMatchObject({ extraId: "extra-ht-only" });
-  });
-
-  it("rejects foot pegs on a mid-drive motor (mid-drive requires pedals)", () => {
-    const ids = ["chassis-fullsus", "wheel-29", "frame-m", "fork-coil-100", "motor-tsdz8", "battery-downtube-48", "brakes-mechanical", "disc-180", "tyres-mtb", "bar-flat", "seatpost-rigid", "foot-pegs", "colour-stealth", "accent-black", "finish-matt"];
-    const r = validateOrder({ lineSlug: "off-road", componentIds: ids, expectedTotalCents: totalFor(ids) }, catalog);
-    expect(r.ok).toBe(false);
-    expect(incompatReasons(r).some((x) => /pedals|hub/i.test(x))).toBe(true);
+    const fsOnly = { ...catalog.extras[0], id: "extra-fs-only", compatibleFrameTypes: ["full_suspension" as const] };
+    const tampered: Catalog = { ...catalog, extras: [...catalog.extras, fsOnly] };
+    // Trailhead is hardtail, so a full-suspension-only extra must be rejected.
+    const r = validateOrder(order({ extraIds: ["extra-fs-only"], expectedTotalCents: correct }), tampered);
+    expect(r.errors.find((e) => e.code === "extra_frame_incompatible")).toMatchObject({ extraId: "extra-fs-only" });
   });
 });
 
@@ -156,7 +150,7 @@ describe("tamper: stale prices", () => {
     const bump = 12000;
     const stale: Catalog = {
       ...catalog,
-      components: catalog.components.map((c) => (c.id === "motor-tsdz16" ? { ...c, priceDeltaCents: c.priceDeltaCents + bump } : c)),
+      components: catalog.components.map((c) => (c.id === "motor-hub-750" ? { ...c, priceDeltaCents: c.priceDeltaCents + bump } : c)),
     };
     const r = validateOrder(order({ expectedTotalCents: correct }), stale);
     expect(r.errors).toEqual([{ code: "price_mismatch", expectedCents: correct, actualCents: correct + bump }]);

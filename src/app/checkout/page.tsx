@@ -129,6 +129,8 @@ function describeError(e: { code: string }): string {
       return "The build is missing one or more components.";
     case "incompatible":
       return "The build contains an incompatible combination.";
+    case "unavailable_component":
+      return "This build includes an option that isn't available for purchase yet.";
     case "unknown_component":
     case "unknown_extra":
       return "The build references an item that no longer exists.";

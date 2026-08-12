@@ -53,20 +53,25 @@ export default async function RidersChoicePage() {
               selectedIds: preset.extraIds ?? [],
             });
             const featured = preset.tier === 3;
+            const comingSoon = preset.componentIds.some((id) => ctx.byId.get(id)?.comingSoon);
             return (
               <div
                 key={preset.id}
                 className={`flex flex-col rounded-2xl border p-6 ${
-                  featured ? "border-brand/40 bg-brand/[0.03]" : "border-line bg-surface"
+                  comingSoon ? "border-line bg-surface opacity-80" : featured ? "border-brand/40 bg-brand/[0.03]" : "border-line bg-surface"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <p className="eyebrow">Tier {preset.tier}</p>
-                  {featured && (
+                  {comingSoon ? (
+                    <span className="rounded-full border border-steel/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-steel">
+                      Coming soon
+                    </span>
+                  ) : featured ? (
                     <span className="rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-white">
                       Flagship
                     </span>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* Hero placeholder — real preset photography lands later. */}
@@ -105,16 +110,22 @@ export default async function RidersChoicePage() {
                   </span>
                 </div>
 
-                <Link
-                  href={`/configure?preset=${preset.id}`}
-                  className={`mt-5 rounded-full px-5 py-2.5 text-center text-sm font-semibold transition ${
-                    featured
-                      ? "bg-brand text-white hover:brightness-105"
-                      : "border border-line text-ink hover:border-muted"
-                  }`}
-                >
-                  Customize this build
-                </Link>
+                {comingSoon ? (
+                  <div className="mt-5 cursor-not-allowed rounded-full border border-line px-5 py-2.5 text-center text-sm font-semibold text-faint">
+                    Coming soon — full-suspension launching later
+                  </div>
+                ) : (
+                  <Link
+                    href={`/configure?preset=${preset.id}`}
+                    className={`mt-5 rounded-full px-5 py-2.5 text-center text-sm font-semibold transition ${
+                      featured
+                        ? "bg-brand text-white hover:brightness-105"
+                        : "border border-line text-ink hover:border-muted"
+                    }`}
+                  >
+                    Customize this build
+                  </Link>
+                )}
               </div>
             );
           })}

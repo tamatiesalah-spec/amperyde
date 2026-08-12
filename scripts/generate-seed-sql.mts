@@ -44,8 +44,8 @@ const orderedComponents = [...components].sort(
 );
 for (const c of orderedComponents) {
   lines.push(
-    `insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, accepted_voltages, swatch, layer_asset, closeup_asset, is_default, sort_order) values (` +
-      `${q(c.id)}, ${q(c.lineId)}, ${q(c.category)}, ${q(c.name)}, ${q(c.description)}, ${n(c.priceDeltaCents)}, ${q(c.frameType)}, ${frameArr(c.compatibleFrameTypes)}, ${q(c.motorType)}, ${n(c.voltage)}, ${intArr(c.acceptedVoltages)}, ${q(c.swatch)}, ${q(c.layerAsset)}, ${q(c.closeupAsset)}, ${b(c.isDefault)}, ${n(c.sortOrder)});`,
+    `insert into components (id, line_id, category, name, description, price_delta_cents, frame_type, compatible_frame_types, motor_type, voltage, accepted_voltages, swatch, layer_asset, closeup_asset, is_default, coming_soon, sort_order) values (` +
+      `${q(c.id)}, ${q(c.lineId)}, ${q(c.category)}, ${q(c.name)}, ${q(c.description)}, ${n(c.priceDeltaCents)}, ${q(c.frameType)}, ${frameArr(c.compatibleFrameTypes)}, ${q(c.motorType)}, ${n(c.voltage)}, ${intArr(c.acceptedVoltages)}, ${q(c.swatch)}, ${q(c.layerAsset)}, ${q(c.closeupAsset)}, ${b(c.isDefault)}, ${b(c.comingSoon ?? false)}, ${n(c.sortOrder)});`,
   );
 }
 lines.push("");

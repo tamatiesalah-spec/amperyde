@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { offRoadCatalog } from "@/data/seed/offRoad";
 import { buildContext, validateBuild } from "@/domain/compatibility";
-import { defaultSelection } from "@/domain/configurator";
-import { CATEGORY_ORDER } from "@/domain/types";
+import { defaultSelection, withAvailableComponents } from "@/domain/configurator";
+import { CATEGORY_ORDER, type Selection } from "@/domain/types";
 
 const ctx = buildContext(offRoadCatalog.components, offRoadCatalog.incompatibilities);
 
@@ -19,5 +19,17 @@ describe("defaultSelection", () => {
     const v = validateBuild(defaultSelection(ctx), ctx);
     expect(v.complete).toBe(true);
     expect(v.valid).toBe(true);
+  });
+});
+
+describe("withAvailableComponents", () => {
+  it("swaps a coming-soon selection for the category's default", () => {
+    const sel: Selection = { chassis: "chassis-fullsus" }; // comingSoon
+    expect(withAvailableComponents(sel, ctx).chassis).toBe("chassis-hardtail");
+  });
+
+  it("leaves an all-available build untouched", () => {
+    const sel = defaultSelection(ctx);
+    expect(withAvailableComponents(sel, ctx)).toEqual(sel);
   });
 });

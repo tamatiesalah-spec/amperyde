@@ -60,6 +60,7 @@ create table components (
   layer_asset            text not null,
   closeup_asset          text,
   is_default             boolean not null default false,
+  coming_soon            boolean not null default false,
   sort_order             integer not null default 0,
   created_at             timestamptz not null default now(),
 

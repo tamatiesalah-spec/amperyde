@@ -20,9 +20,11 @@ const components: Component[] = [
   c({ id: "chassis-hardtail", lineId: LINE_ID, category: "chassis", name: "Hardtail",
     description: "Rigid rear, light and direct. Unlocks hub motors and triangle batteries.",
     priceDeltaCents: 0, frameType: "hardtail", layerAsset: asset("chassis", "hardtail"), isDefault: true, sortOrder: 10 }),
+  // Full-suspension is not yet available for purchase (comingSoon). Kept in the
+  // model — flip comingSoon off to launch it (and un-hide the FS presets).
   c({ id: "chassis-fullsus", lineId: LINE_ID, category: "chassis", name: "Full Suspension",
     description: "Rear travel for technical descents.",
-    priceDeltaCents: 120000, frameType: "full_suspension", layerAsset: asset("chassis", "fullsus"), isDefault: false, sortOrder: 20 }),
+    priceDeltaCents: 120000, frameType: "full_suspension", comingSoon: true, layerAsset: asset("chassis", "fullsus"), isDefault: false, sortOrder: 20 }),
 
   // --- Q2 WHEEL SIZE -------------------------------------------------------
   c({ id: "wheel-275", lineId: LINE_ID, category: "wheel_size", name: '27.5"',
